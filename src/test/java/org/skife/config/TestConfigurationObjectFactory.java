@@ -28,6 +28,14 @@ public class TestConfigurationObjectFactory
     }
 
     @Test
+    public void testDefaultViaImpl() throws Exception
+    {
+        ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties());
+        Config2 config = c.build(Config2.class);
+        assertEquals(config.getOption(), "default");
+    }
+
+    @Test
     public void testTypes()
     {
         ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties() {{
