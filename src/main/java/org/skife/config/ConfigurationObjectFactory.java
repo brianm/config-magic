@@ -5,10 +5,13 @@ import net.sf.cglib.proxy.CallbackFilter;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.FixedValue;
 import net.sf.cglib.proxy.NoOp;
+import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.MethodProxy;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationConverter;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,14 +41,31 @@ public class ConfigurationObjectFactory
         int count = 1;
         for (final Method method : configClass.getMethods()) {
             if (method.isAnnotationPresent(Config.class)) {
-                final Config ca = method.getAnnotation(Config.class);
+                final Config annotation = method.getAnnotation(Config.class);
                 slots.put(method, count++);
-                callbacks.add(new FixedValue()
-                {
-                    public Object loadObject() throws Exception {
-                        return bully.coerce(config, method, ca.value());
-                    }
-                });
+
+                String value = config.getString(annotation.value());
+
+                if (value == null && method.isAnnotationPresent(Default.class)) {
+                    value = method.getAnnotation(Default.class).value();
+                }
+
+                if (value != null) {
+                    final Object finalValue = bully.coerce(method.getReturnType(), value);
+                    callbacks.add(new FixedValue()
+                    {
+                        public Object loadObject() throws Exception {
+                            return finalValue;
+                        }
+                    });
+                }
+                else if (Modifier.isAbstract(method.getModifiers())) {
+                    // no default (via impl or @Default) and no configured value
+                    throw new RuntimeException(String.format("No value present for %s [%s]", annotation.value(), method.toGenericString()));
+                }
+                else {
+                    callbacks.add(NoOp.INSTANCE);
+                }
             }
         }
 
