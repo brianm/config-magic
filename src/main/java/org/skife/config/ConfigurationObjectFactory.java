@@ -61,11 +61,14 @@ public class ConfigurationObjectFactory
                 }
                 else if (Modifier.isAbstract(method.getModifiers())) {
                     // no default (via impl or @Default) and no configured value
-                    throw new RuntimeException(String.format("No value present for %s [%s]", annotation.value(), method.toGenericString()));
+                    throw new RuntimeException(String.format("No value present for '%s' in [%s]", annotation.value(), method.toGenericString()));
                 }
                 else {
                     callbacks.add(NoOp.INSTANCE);
                 }
+            }
+            else if (Modifier.isAbstract(method.getModifiers())) {
+                throw new AbstractMethodError(String.format("Method [%s] does is abstract but does not have an @Config annotation", method.toGenericString()));
             }
         }
 

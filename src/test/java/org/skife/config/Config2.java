@@ -1,6 +1,6 @@
 package org.skife.config;
 
-public abstract class Config2
+class Config2
 {
     // optional w/ default value
     @Config("option")

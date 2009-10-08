@@ -1,6 +1,7 @@
 package org.skife.config;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 
 import java.util.Properties;
@@ -36,6 +37,41 @@ public class TestConfigurationObjectFactory
     }
 
     @Test
+    public void testProvidedOverridesDefault() throws Exception
+    {
+        ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties() {{
+            setProperty("option", "provided");
+        }});
+        
+        Config2 config = c.build(Config2.class);
+        assertEquals(config.getOption(), "provided");
+    }
+
+    @Test
+    public void testMissingDefault() throws Exception
+    {
+        ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties());
+        try {
+            c.build(Config3.class);
+            fail("Expected exception due to missing value");
+        }
+        catch (Exception e) {
+        }
+    }
+
+    @Test
+    public void testDetectsAbstractMethod() throws Exception
+    {
+        ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties());
+        try {
+            c.build(Config4.class);
+            fail("Expected exception due to abstract method without @Config annotation");
+        }
+        catch (AbstractMethodError e) {
+        }
+    }
+
+    @Test
     public void testTypes()
     {
         ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties() {{
@@ -68,10 +104,10 @@ public class TestConfigurationObjectFactory
         assertEquals(Integer.valueOf(Integer.MAX_VALUE), config.getBoxedIntegerOption());
         assertEquals(Long.MAX_VALUE, config.getLongOption());
         assertEquals(Long.valueOf(Long.MAX_VALUE), config.getBoxedLongOption());
-        assertEquals(Float.MAX_VALUE, config.getFloatOption());
-        assertEquals(Float.MAX_VALUE, config.getBoxedFloatOption());
-        assertEquals(Double.MAX_VALUE, config.getDoubleOption());
-        assertEquals(Double.MAX_VALUE, config.getBoxedDoubleOption());
+        assertEquals(Float.MAX_VALUE, config.getFloatOption(), 0);
+        assertEquals(Float.valueOf(Float.MAX_VALUE), config.getBoxedFloatOption());
+        assertEquals(Double.MAX_VALUE, config.getDoubleOption(), 0);
+        assertEquals(Double.valueOf(Double.MAX_VALUE), config.getBoxedDoubleOption());
     }
 
     public abstract static class Thing

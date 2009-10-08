@@ -1,6 +1,6 @@
 package org.skife.config;
 
-public interface Config1
+interface Config1
 {
     @Config("stringOption")
     String getStringOption();
