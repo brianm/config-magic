@@ -4,10 +4,7 @@ import org.apache.commons.configuration.Configuration;
 
 import java.lang.reflect.Method;
 
-/**
- *
- */
-public class Bully
+class Bully
 {
     public Object coerce(Class<?> type, String value) {
         if (String.class.isAssignableFrom(type)) {
