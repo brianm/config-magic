@@ -23,12 +23,12 @@ public class ConfigurationObjectFactory
     private final Bully bully;
 
     public ConfigurationObjectFactory(Properties props) {
-        this(ConfigurationConverter.getConfiguration(props), new Bully());
+        this(ConfigurationConverter.getConfiguration(props));
     }
 
-    public ConfigurationObjectFactory(Configuration config, Bully bully) {
+    public ConfigurationObjectFactory(Configuration config) {
         this.config = config;
-        this.bully = bully;
+        this.bully = new Bully(); 
     }
 
     public <T> T build(Class<T> configClass) {
