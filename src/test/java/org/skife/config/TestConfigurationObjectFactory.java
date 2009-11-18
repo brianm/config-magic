@@ -18,14 +18,14 @@ public class TestConfigurationObjectFactory
             setProperty("theValue", "value");
         }});
         Thing t = c.build(Thing.class);
-        assertEquals(t.getName(), "world");
+        assertEquals("world", t.getName());
     }
 
     @Test
     public void testDefaultValue() throws Exception {
         ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties());
         Thing t = c.build(Thing.class);
-        assertEquals(t.getName(), "woof");
+        assertEquals("woof", t.getName());
     }
 
     @Test
@@ -54,7 +54,7 @@ public class TestConfigurationObjectFactory
         }});
         
         Config2 config = c.build(Config2.class);
-        assertEquals(config.getOption(), "provided");
+        assertEquals("provided", config.getOption());
     }
 
     @Test
