@@ -33,7 +33,17 @@ public class TestConfigurationObjectFactory
     {
         ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties());
         Config2 config = c.build(Config2.class);
-        assertEquals(config.getOption(), "default");
+        assertEquals("default", config.getOption());
+    }
+
+    @Test
+    public void testMemoization() throws Exception
+    {
+        ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties());
+        Config2 config = c.build(Config2.class);
+        assertEquals("default", config.getOption());
+        assertEquals("default", config.getOption());
+        assertEquals(1, config.getInvocationCount());
     }
 
     @Test

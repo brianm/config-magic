@@ -62,7 +62,18 @@ public class ConfigurationObjectFactory
                             annotation.value(), method.toGenericString()));
                 }
                 else {
-                    callbacks.add(NoOp.INSTANCE);
+                    callbacks.add(new MethodInterceptor() {
+                        private Object value;
+
+                        public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable
+                        {
+                            if (value == null) {
+                                value = proxy.invokeSuper(obj, args);
+                            }
+
+                            return value;
+                        }
+                    });
                 }
             }
             else if (Modifier.isAbstract(method.getModifiers())) {
