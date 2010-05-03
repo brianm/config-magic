@@ -1,10 +1,11 @@
 package org.skife.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import org.junit.Test;
 
 import java.util.Properties;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -18,14 +19,38 @@ public class TestConfigurationObjectFactory
             setProperty("theValue", "value");
         }});
         Thing t = c.build(Thing.class);
-        assertEquals("world", t.getName());
+        assertEquals(t.getName(), "world");
+    }
+
+    @Test
+    public void testEnum() throws Exception {
+        ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties() {{
+            setProperty("option.one", "1");
+            setProperty("option.two", "2");
+        }});
+        EnumeratedConfig1 t = c.build(EnumeratedConfig1.class);
+        assertEquals(t.getStringOption(TestEnum.ONE), "1");
+        assertEquals(t.getStringOption(TestEnum.TWO), "2");
+        assertEquals(t.getStringOption(TestEnum.THREE), "default");
+    }
+
+    @Test
+    public void testMultiParameters() throws Exception {
+        ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties() {{
+            setProperty("another-option.one.a", "1-x");
+            setProperty("another-option.two.b", "2-y");
+        }});
+        EnumeratedConfig1 t = c.build(EnumeratedConfig1.class);
+        assertEquals(t.getStringOption2Types(TestEnum.ONE, "a"), "1-x");
+        assertEquals(t.getStringOption2Types(TestEnum.TWO, "b"), "2-y");
+        assertEquals(t.getStringOption2Types(TestEnum.ONE, "dummy"), "default");
     }
 
     @Test
     public void testDefaultValue() throws Exception {
         ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties());
         Thing t = c.build(Thing.class);
-        assertEquals("woof", t.getName());
+        assertEquals(t.getName(), "woof");
     }
 
     @Test
@@ -33,17 +58,7 @@ public class TestConfigurationObjectFactory
     {
         ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties());
         Config2 config = c.build(Config2.class);
-        assertEquals("default", config.getOption());
-    }
-
-    @Test
-    public void testMemoization() throws Exception
-    {
-        ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties());
-        Config2 config = c.build(Config2.class);
-        assertEquals("default", config.getOption());
-        assertEquals("default", config.getOption());
-        assertEquals(1, config.getInvocationCount());
+        assertEquals(config.getOption(), "default");
     }
 
     @Test
@@ -54,7 +69,7 @@ public class TestConfigurationObjectFactory
         }});
         
         Config2 config = c.build(Config2.class);
-        assertEquals("provided", config.getOption());
+        assertEquals(config.getOption(), "provided");
     }
 
     @Test
