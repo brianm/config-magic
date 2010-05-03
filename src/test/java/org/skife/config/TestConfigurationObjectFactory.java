@@ -29,9 +29,9 @@ public class TestConfigurationObjectFactory
             setProperty("option.two", "2");
         }});
         EnumeratedConfig1 t = c.build(EnumeratedConfig1.class);
-        assertEquals(t.getStringOption(TestEnum.ONE), "1");
-        assertEquals(t.getStringOption(TestEnum.TWO), "2");
-        assertEquals(t.getStringOption(TestEnum.THREE), "default");
+        assertEquals(t.getStringOption(ConfigEnum.ONE), "1");
+        assertEquals(t.getStringOption(ConfigEnum.TWO), "2");
+        assertEquals(t.getStringOption(ConfigEnum.THREE), "default");
     }
 
     @Test
@@ -41,9 +41,9 @@ public class TestConfigurationObjectFactory
             setProperty("another-option.two.b", "2-y");
         }});
         EnumeratedConfig1 t = c.build(EnumeratedConfig1.class);
-        assertEquals(t.getStringOption2Types(TestEnum.ONE, "a"), "1-x");
-        assertEquals(t.getStringOption2Types(TestEnum.TWO, "b"), "2-y");
-        assertEquals(t.getStringOption2Types(TestEnum.ONE, "dummy"), "default");
+        assertEquals(t.getStringOption2Types(ConfigEnum.ONE, "a"), "1-x");
+        assertEquals(t.getStringOption2Types(ConfigEnum.TWO, "b"), "2-y");
+        assertEquals(t.getStringOption2Types(ConfigEnum.ONE, "dummy"), "default");
     }
 
     @Test

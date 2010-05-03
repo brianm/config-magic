@@ -1,6 +1,6 @@
 package org.skife.config;
 
-public enum TestEnum
+public enum ConfigEnum
 {
     ONE,
     TWO,
