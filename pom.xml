@@ -1,13 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.skife</groupId>
+    <groupId>org.skife.config</groupId>
     <artifactId>config-magic</artifactId>
     <packaging>jar</packaging>
     <version>0.4-SNAPSHOT</version>
     <name>skife-config</name>
     <url>http://github.com/brianm/config-magic</url>
-
+    <description>
+        A configguration object convenience librray.
+    </description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
