@@ -3,7 +3,7 @@
     <groupId>org.skife.config</groupId>
     <artifactId>config-magic</artifactId>
     <packaging>jar</packaging>
-    <version>0.4</version>
+    <version>0.5-SNAPSHOT</version>
     <name>skife-config</name>
     <url>http://github.com/brianm/config-magic</url>
     <description>
