@@ -7,8 +7,6 @@ import net.sf.cglib.proxy.FixedValue;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import net.sf.cglib.proxy.NoOp;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.ConfigurationConverter;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -21,14 +19,14 @@ import java.util.Properties;
 
 public class ConfigurationObjectFactory
 {
-    private final Configuration config;
+    private final ConfigSource config;
     private final Bully bully;
 
     public ConfigurationObjectFactory(Properties props) {
-        this(ConfigurationConverter.getConfiguration(props));
+        this(new SimplePropertyConfigSource(props));
     }
 
-    public ConfigurationObjectFactory(Configuration config) {
+    public ConfigurationObjectFactory(ConfigSource config) {
         this.config = config;
         this.bully = new Bully();
     }
