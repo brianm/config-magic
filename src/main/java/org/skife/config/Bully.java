@@ -1,8 +1,5 @@
 package org.skife.config;
 
-import org.apache.commons.configuration.Configuration;
-
-import java.lang.reflect.Method;
 
 class Bully
 {
@@ -31,7 +28,7 @@ class Bully
         else if (Double.class.isAssignableFrom(type) || Double.TYPE.isAssignableFrom(type)) {
             return Double.valueOf(value);
         }
-        
+
         return value;
     }
 }
