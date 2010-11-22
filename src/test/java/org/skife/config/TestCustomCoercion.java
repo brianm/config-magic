@@ -15,7 +15,7 @@ public class TestCustomCoercion
     public void testNoConverterConfig()
     {
         ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties() {{
-            setProperty("the-url", "http//github.org/brianm/config-magic");
+            setProperty("the-url", "http://github.org/brianm/config-magic");
         }});
 
         c.build(WibbleConfig.class);
@@ -25,7 +25,7 @@ public class TestCustomCoercion
     public void testWithConverterConfig()
     {
         ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties() {{
-            setProperty("the-url", "http//github.org/brianm/config-magic");
+            setProperty("the-url", "http://github.org/brianm/config-magic");
         }});
 
         c.addCoercible(new WibbleCoercible());
@@ -37,7 +37,7 @@ public class TestCustomCoercion
         Wibble w = wc.getWibble();
         Assert.assertThat(w, is(notNullValue()));
 
-        Assert.assertThat(w.getURL(), equalTo("http//github.org/brianm/config-magic"));
+        Assert.assertThat(w.getURL(), equalTo("http://github.org/brianm/config-magic"));
     }
 
     private static class WibbleCoercible implements Coercible<Wibble>
