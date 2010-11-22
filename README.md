@@ -44,3 +44,7 @@ To use config-magic in Maven projects:
         <artifactId>config-magic</artifactId>
         <version>0.4</version>
     </dependency>
+
+# Mailing List
+
+We have a [mailing list](http://groups.google.com/group/config-magic) for development and users.
