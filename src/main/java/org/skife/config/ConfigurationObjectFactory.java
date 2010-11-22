@@ -31,6 +31,11 @@ public class ConfigurationObjectFactory
         this.bully = new Bully();
     }
 
+    public void addCoercible(final Coercible<?> coercible) {
+        this.bully.addCoercible(coercible);
+    }
+
+
     public <T> T buildWithReplacements(Class<T> configClass, Map<String, String> mappedReplacements) {
         return internalBuild(configClass, mappedReplacements);
     }

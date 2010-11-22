@@ -18,7 +18,7 @@ public class TestCoercion
     public void setUp()
     {
         this.c = new ConfigurationObjectFactory(new Properties() {{
-            setProperty("the-url", "http//github.org/brianm/config-magic");
+            setProperty("the-url", "http://github.org/brianm/config-magic");
         }});
     }
 
@@ -31,13 +31,13 @@ public class TestCoercion
     @Test(expected=IllegalStateException.class)
     public void testBadConfig()
     {
-        BadCoercionConfig bcc = c.build(BadCoercionConfig.class);
+        c.build(WibbleConfig.class);
     }
 
     @Test
     public void testGoodConfig()
     {
         CoercionConfig cc = c.build(CoercionConfig.class);
-        Assert.assertThat(cc.getURI(), is(URI.create("http//github.org/brianm/config-magic")));
+        Assert.assertThat(cc.getURI(), is(URI.create("http://github.org/brianm/config-magic")));
     }
 }
