@@ -26,6 +26,15 @@ Then create the config object from the properties:
     ConfigurationObjectFactory factory = new ConfigurationObjectFactory(props);
     MyConfig conf = factory.build(MyConfig.class);
 
+# Advanced usage
+
+        @Config({"what1", "what2"})
+        @Default("none")
+        String getWhat();
+
+   will look at 'what1' first, then at 'what2' and finally fall back to the default. 
+    
+
 # Maven dependency
 
 To use config-magic in Maven projects:

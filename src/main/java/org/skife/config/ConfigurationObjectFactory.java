@@ -79,11 +79,25 @@ public class ConfigurationObjectFactory
 
     private void buildSimple(ArrayList<Callback> callbacks, Method method, Config annotation,
                              Map<String, String> mappedReplacements) {
-        String propertyName = annotation.value();
-        if ( mappedReplacements != null ) {
-            propertyName = applyReplacements(propertyName, mappedReplacements);
+        String [] propertyNames = annotation.value();
+
+        if (propertyNames == null || propertyNames.length == 0) {
+            throw new IllegalArgumentException("Method " + method.toGenericString() + " declares config annotation but no field name!");
         }
-        String value = config.getString(propertyName);
+
+        String value = null;
+
+        for (String propertyName : propertyNames) {
+            if ( mappedReplacements != null ) {
+                propertyName = applyReplacements(propertyName, mappedReplacements);
+            }
+            value = config.getString(propertyName);
+
+            // First value found wins
+            if (value != null) {
+                break;
+            }
+        }
 
         if (value == null && method.isAnnotationPresent(Default.class)) {
             value = method.getAnnotation(Default.class).value();
@@ -100,7 +114,7 @@ public class ConfigurationObjectFactory
         else if (Modifier.isAbstract(method.getModifiers())) {
             // no default (via impl or @Default) and no configured value
             throw new RuntimeException(String.format("No value present for '%s' in [%s]",
-                                                     propertyName, method.toGenericString()));
+                                                     propertyNames, method.toGenericString()));
         }
         else {
             callbacks.add(NoOp.INSTANCE);
@@ -141,23 +155,30 @@ public class ConfigurationObjectFactory
         }
 
         final Object bulliedDefaultValue = bully.coerce(method.getReturnType(), defaultValue);
-        final String annotationValue = annotation.value();
+        final String [] annotationValues = annotation.value();
+
+        if (annotationValues == null || annotationValues.length == 0) {
+            throw new IllegalArgumentException("Method " + method.toGenericString() + " declares config annotation but no field name!");
+        }
+
         callbacks.add(new MethodInterceptor() {
             public Object intercept(Object o, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
-                String property = annotationValue;
-                if (args.length == paramTokenList.size()) {
-                    for (int i = 0; i < paramTokenList.size(); ++i) {
-                        property = property.replace(paramTokenList.get(i), String.valueOf(args[i]));
-                    }
-                    String value = config.getString(property);
-                    if (value != null) {
-                        return bully.coerce(method.getReturnType(), value);
-                    }
-                }
-                else {
-                    throw new IllegalStateException("Argument list doesn't match @Param list");
-                }
+                String [] properties = annotationValues;
 
+                for (String property : properties) {
+                    if (args.length == paramTokenList.size()) {
+                        for (int i = 0; i < paramTokenList.size(); ++i) {
+                            property = property.replace(paramTokenList.get(i), String.valueOf(args[i]));
+                        }
+                        String value = config.getString(property);
+                        if (value != null) {
+                            return bully.coerce(method.getReturnType(), value);
+                        }
+                    }
+                    else {
+                        throw new IllegalStateException("Argument list doesn't match @Param list");
+                    }
+                }
                 return bulliedDefaultValue;
             }
         });
