@@ -1,34 +1,50 @@
 package org.skife.config;
 
+import java.net.URI;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 
 class Bully
 {
-    public Object coerce(Class<?> type, String value) {
-        if (String.class.isAssignableFrom(type)) {
-            return value;
-        }
-        else if (Boolean.class.isAssignableFrom(type) || Boolean.TYPE.isAssignableFrom(type)) {
-            return Boolean.valueOf(value);
-        }
-        else if (Byte.class.isAssignableFrom(type) || Byte.TYPE.isAssignableFrom(type)) {
-            return Byte.valueOf(value);
-        }
-        else if (Short.class.isAssignableFrom(type) || Short.TYPE.isAssignableFrom(type)) {
-            return Short.valueOf(value);
-        }
-        else if (Integer.class.isAssignableFrom(type) || Integer.TYPE.isAssignableFrom(type)) {
-            return Integer.valueOf(value);
-        }
-        else if (Long.class.isAssignableFrom(type) || Long.TYPE.isAssignableFrom(type)) {
-            return Long.valueOf(value);
-        }
-        else if (Float.class.isAssignableFrom(type) || Float.TYPE.isAssignableFrom(type)) {
-            return Float.valueOf(value);
-        }
-        else if (Double.class.isAssignableFrom(type) || Double.TYPE.isAssignableFrom(type)) {
-            return Double.valueOf(value);
-        }
+    private static final Map<Class<?>, Coercible<?>> DEFAULT_COERCIBLES;
 
-        return value;
+    static {
+        final Map<Class<?>, Coercible<?>> defaultCoercibles = new HashMap<Class<?>, Coercible<?>>();
+
+        defaultCoercibles.put(Boolean.class, Coercible.BOOLEAN_COERCIBLE);
+        defaultCoercibles.put(Boolean.TYPE, Coercible.BOOLEAN_COERCIBLE);
+        defaultCoercibles.put(Byte.class, Coercible.BYTE_COERCIBLE);
+        defaultCoercibles.put(Byte.TYPE, Coercible.BYTE_COERCIBLE);
+        defaultCoercibles.put(Short.class, Coercible.SHORT_COERCIBLE);
+        defaultCoercibles.put(Short.TYPE, Coercible.SHORT_COERCIBLE);
+        defaultCoercibles.put(Integer.class, Coercible.INTEGER_COERCIBLE);
+        defaultCoercibles.put(Integer.TYPE, Coercible.INTEGER_COERCIBLE);
+        defaultCoercibles.put(Long.class, Coercible.LONG_COERCIBLE);
+        defaultCoercibles.put(Long.TYPE, Coercible.LONG_COERCIBLE);
+        defaultCoercibles.put(Float.class, Coercible.FLOAT_COERCIBLE);
+        defaultCoercibles.put(Float.TYPE, Coercible.FLOAT_COERCIBLE);
+        defaultCoercibles.put(Double.class, Coercible.DOUBLE_COERCIBLE);
+        defaultCoercibles.put(Double.TYPE, Coercible.DOUBLE_COERCIBLE);
+        defaultCoercibles.put(String.class, Coercible.STRING_COERCIBLE);
+        defaultCoercibles.put(URI.class, Coercible.URI_COERCIBLE);
+
+        DEFAULT_COERCIBLES = Collections.unmodifiableMap(defaultCoercibles);
+    }
+
+    private final Map<Class<?>, Coercible<?>> mappings = new HashMap<Class<?>, Coercible<?>>();
+
+    public Bully()
+    {
+        mappings.putAll(DEFAULT_COERCIBLES);
+    }
+
+    public Object coerce(Class<?> type, String value) {
+        final Coercible<?> coercible = mappings.get(type);
+        if (coercible == null) {
+            throw new IllegalStateException(String.format("Don't know how to handle a '%s' type for value '%s'", type.getName(), value));
+        }
+        return coercible.coerce(value);
     }
 }
