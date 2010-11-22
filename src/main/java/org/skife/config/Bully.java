@@ -12,7 +12,7 @@ class Bully
     /** All explicit type conversions that config magic knows about. Every new bully will know about those. */
     private static final List<Coercible<?>> TYPE_COERCIBLES;
 
-    /** Catchall converters. These will be run if not specific type coercer was found. */
+    /** Catchall converters. These will be run if no specific type coercer was found. */
     private static final List<Coercible<?>> DEFAULT_COERCIBLES;
 
     static {
