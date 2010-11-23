@@ -119,7 +119,7 @@ public class ConfigurationObjectFactory
         else if (Modifier.isAbstract(method.getModifiers())) {
             // no default (via impl or @Default) and no configured value
             throw new RuntimeException(String.format("No value present for '%s' in [%s]",
-                                                     propertyNames, method.toGenericString()));
+                                                     prettyPrint(propertyNames, mappedReplacements), method.toGenericString()));
         }
         else {
             callbacks.add(NoOp.INSTANCE);
@@ -138,7 +138,7 @@ public class ConfigurationObjectFactory
     private void buildParameterized(ArrayList<Callback> callbacks, Method method, Config annotation) {
         if (!method.isAnnotationPresent(Default.class)) {
             throw new RuntimeException(String.format("No value present for '%s' in [%s]",
-                                                     annotation.value(), method.toGenericString()));
+                                                     prettyPrint(annotation.value(), null), method.toGenericString()));
         }
         String defaultValue = method.getAnnotation(Default.class).value();
 
@@ -191,5 +191,33 @@ public class ConfigurationObjectFactory
 
     private String makeToken(String temp) {
         return "${" + temp + "}";
+    }
+
+    private String prettyPrint(String [] values, final Map<String, String> mappedReplacements)
+    {
+        if (values == null || values.length == 0) {
+            return "";
+        }
+        final StringBuilder sb = new StringBuilder('[');
+
+        for (int i = 0; i < values.length; i++) {
+            sb.append(values[i]);
+            if (i < (values.length - 1)) {
+                sb.append(", ");
+            }
+        }
+        sb.append(']');
+        if (mappedReplacements != null && mappedReplacements.size() > 0) {
+            sb.append(" translated to [");
+            for (int i = 0; i < values.length; i++) {
+                sb.append(applyReplacements(values[i], mappedReplacements));
+                if (i < (values.length - 1)) {
+                    sb.append(", ");
+                }
+            }
+            sb.append(']');
+        }
+
+        return sb.toString();
     }
 }
