@@ -11,7 +11,6 @@ import java.sql.Date;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
-import org.skife.config.Coercible.Coercer;
 
 public class TestDefaultCoercibles
 {

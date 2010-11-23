@@ -4,19 +4,101 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class DefaultCoercibles
+final class DefaultCoercibles
 {
     private DefaultCoercibles()
     {
     }
 
+    static final Coercible<Boolean> BOOLEAN_COERCIBLE = new Coercible<Boolean>() {
+        public Coercer<Boolean> accept(final Class<?> clazz) {
+            if (Boolean.class.isAssignableFrom(clazz) || Boolean.TYPE.isAssignableFrom(clazz)) {
+                return DefaultCoercibles.BOOLEAN_COERCER;
+            }
+            return null;
+        }
+    };
+
+    static final Coercible<Byte> BYTE_COERCIBLE = new Coercible<Byte>() {
+        public Coercer<Byte> accept(final Class<?> clazz) {
+            if (Byte.class.isAssignableFrom(clazz) || Byte.TYPE.isAssignableFrom(clazz)) {
+                return DefaultCoercibles.BYTE_COERCER;
+            }
+            return null;
+        }
+    };
+
+    static final Coercible<Short> SHORT_COERCIBLE = new Coercible<Short>() {
+        public Coercer<Short> accept(final Class<?> clazz) {
+            if (Short.class.isAssignableFrom(clazz) || Short.TYPE.isAssignableFrom(clazz)) {
+                return DefaultCoercibles.SHORT_COERCER;
+            }
+            return null;
+        }
+    };
+
+    static final Coercible<Integer> INTEGER_COERCIBLE = new Coercible<Integer>() {
+        public Coercer<Integer> accept(final Class<?> clazz) {
+            if (Integer.class.isAssignableFrom(clazz) || Integer.TYPE.isAssignableFrom(clazz)) {
+                return DefaultCoercibles.INTEGER_COERCER;
+            }
+            return null;
+        }
+    };
+
+    static final Coercible<Long> LONG_COERCIBLE = new Coercible<Long>() {
+        public Coercer<Long> accept(final Class<?> clazz) {
+            if (Long.class.isAssignableFrom(clazz) || Long.TYPE.isAssignableFrom(clazz)) {
+                return DefaultCoercibles.LONG_COERCER;
+            }
+            return null;
+        }
+    };
+
+    static final Coercible<Float> FLOAT_COERCIBLE = new Coercible<Float>() {
+        public Coercer<Float> accept(final Class<?> clazz) {
+            if (Float.class.isAssignableFrom(clazz) || Float.TYPE.isAssignableFrom(clazz)) {
+                return DefaultCoercibles.FLOAT_COERCER;
+            }
+            return null;
+        }
+    };
+
+    static final Coercible<Double> DOUBLE_COERCIBLE = new Coercible<Double>() {
+        public Coercer<Double> accept(final Class<?> clazz) {
+            if (Double.class.isAssignableFrom(clazz) || Double.TYPE.isAssignableFrom(clazz)) {
+                return DefaultCoercibles.DOUBLE_COERCER;
+            }
+            return null;
+        }
+    };
+
+    static final Coercible<String> STRING_COERCIBLE = new Coercible<String>() {
+        public Coercer<String> accept(final Class<?> clazz) {
+            if (String.class.equals(clazz)) {
+                return DefaultCoercibles.STRING_COERCER;
+            }
+            return null;
+        }
+    };
+
+    static final Coercible<URI> URI_COERCIBLE = new Coercible<URI>() {
+        public Coercer<URI> accept(final Class<?> clazz) {
+            if (URI.class.equals(clazz)) {
+                return DefaultCoercibles.URI_COERCER;
+            }
+            return null;
+        }
+    };
+
     /**
      * A Coercible that accepts any type with a static <code>valueOf(String)</code> method.
      */
-    public static final Coercible<?> VALUE_OF_COERCIBLE = new Coercible<Object>() {
+    static final Coercible<?> VALUE_OF_COERCIBLE = new Coercible<Object>() {
 
         private Map<Class<?>, Coercer<Object>> coercerMap = new HashMap<Class<?>, Coercer<Object>>();
 
@@ -69,7 +151,7 @@ public final class DefaultCoercibles
     /**
      * A Coercible that accepts any type with a c'tor that takes a single string parameter.
      */
-    public static final Coercible<?> STRING_CTOR_COERCIBLE = new Coercible<Object>() {
+    static final Coercible<?> STRING_CTOR_COERCIBLE = new Coercible<Object>() {
 
         private Map<Class<?>, Coercer<Object>> coercerMap = new HashMap<Class<?>, Coercer<Object>>();
 
@@ -112,7 +194,7 @@ public final class DefaultCoercibles
      *
      * This one was lovingly prepared and added for Jodatime DateTime objects.
      */
-    public static final Coercible<?> OBJECT_CTOR_COERCIBLE = new Coercible<Object>() {
+    static final Coercible<?> OBJECT_CTOR_COERCIBLE = new Coercible<Object>() {
 
         private Map<Class<?>, Coercer<Object>> coercerMap = new HashMap<Class<?>, Coercer<Object>>();
 
@@ -149,6 +231,61 @@ public final class DefaultCoercibles
             return coercer;
         }
     };
+
+    static final Coercer<Boolean> BOOLEAN_COERCER = new Coercer<Boolean>() {
+        public Boolean coerce(final String value) {
+            return Boolean.valueOf(value);
+        }
+    };
+
+    static final Coercer<Byte> BYTE_COERCER = new Coercer<Byte>() {
+        public Byte coerce(final String value) {
+            return Byte.valueOf(value);
+        }
+    };
+
+    static final Coercer<Short> SHORT_COERCER = new Coercer<Short>() {
+        public Short coerce(final String value) {
+            return Short.valueOf(value);
+        }
+    };
+
+    static final Coercer<Integer> INTEGER_COERCER = new Coercer<Integer>() {
+        public Integer coerce(final String value) {
+            return Integer.valueOf(value);
+        }
+    };
+
+    static final Coercer<Long> LONG_COERCER = new Coercer<Long>() {
+        public Long coerce(final String value) {
+            return Long.valueOf(value);
+        }
+    };
+
+    static final Coercer<Float> FLOAT_COERCER = new Coercer<Float>() {
+        public Float coerce(final String value) {
+            return Float.valueOf(value);
+        }
+    };
+
+    static final Coercer<Double> DOUBLE_COERCER = new Coercer<Double>() {
+        public Double coerce(final String value) {
+            return Double.valueOf(value);
+        }
+    };
+
+    static final Coercer<String> STRING_COERCER = new Coercer<String>() {
+        public String coerce(final String value) {
+            return value;
+        }
+    };
+
+    static final Coercer<URI> URI_COERCER = new Coercer<URI>() {
+        public URI coerce(final String value) {
+            return URI.create(value);
+        }
+    };
+
 
     private static final RuntimeException convertException(final Throwable t)
     {
