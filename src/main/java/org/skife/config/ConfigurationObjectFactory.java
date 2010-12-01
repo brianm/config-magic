@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public class ConfigurationObjectFactory
 {
-    private final ConcurrentMap<Class, Factory> factories = new ConcurrentHashMap<Class, Factory>();
+    private static final ConcurrentMap<Class, Factory> factories = new ConcurrentHashMap<Class, Factory>();
     private final ConfigSource config;
     private final Bully bully;
 
