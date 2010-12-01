@@ -125,17 +125,13 @@ public class ConfigurationObjectFactory
             value = method.getAnnotation(Default.class).value();
         }
 
-        if (value != null) {
-            final Object finalValue = bully.coerce(method.getReturnType(), value);
-            callbacks.add(new ConfigMagicFixedValue(finalValue));
-        }
-        else if (Modifier.isAbstract(method.getModifiers())) {
-            // no default (via impl or @Default) and no configured value
+        if (value == null && Modifier.isAbstract(method.getModifiers())) {
             throw new RuntimeException(String.format("No value present for '%s' in [%s]",
                                                      prettyPrint(propertyNames, mappedReplacements), method.toGenericString()));
         }
         else {
-            callbacks.add(NoOp.INSTANCE);
+            final Object finalValue = bully.coerce(method.getReturnType(), value);
+            callbacks.add(new ConfigMagicFixedValue(finalValue));
         }
     }
 
@@ -217,22 +213,54 @@ public class ConfigurationObjectFactory
         return sb.toString();
     }
 
-    private static final class ConfigMagicFixedValue implements FixedValue
+    private static final class ConfigMagicFixedValue implements MethodInterceptor
     {
-        private final Object finalValue;
+        private final Handler handler;
 
         private ConfigMagicFixedValue(final Object finalValue)
         {
-            this.finalValue = finalValue;
+            if (finalValue == null) {
+                this.handler = new InvokeSuperHandler();
+            }
+            else {
+                handler = new FixedValueHandler(finalValue);
+            }
         }
 
-        public Object loadObject() throws Exception
+        public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable
         {
-            return finalValue;
+            return handler.handle(methodProxy, o, objects);
         }
-    }
 
-    ;
+        private static interface Handler
+        {
+            Object handle(MethodProxy m, Object o, Object[] args) throws Throwable;
+        }
+
+        private static class InvokeSuperHandler implements Handler
+        {
+            public Object handle(MethodProxy m, Object o, Object[] args) throws Throwable
+            {
+                return m.invokeSuper(o, args);
+            }
+        }
+
+        private static class FixedValueHandler implements Handler
+        {
+            private final Object finalValue;
+
+            public FixedValueHandler(Object finalValue)
+            {
+                this.finalValue = finalValue;
+            }
+
+            public Object handle(MethodProxy m, Object o, Object[] args) throws Throwable
+            {
+                return finalValue;
+            }
+        }
+
+    }
 
 
     private static final class ConfigMagicCallbackFilter implements CallbackFilter

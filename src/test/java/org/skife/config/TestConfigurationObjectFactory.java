@@ -95,6 +95,27 @@ public class TestConfigurationObjectFactory
     }
 
     @Test
+    public void testSameConfigObjectClassUsedForEachInstanceEvenWithDifferentCOFs() throws Exception
+    {
+        ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties()
+        {{
+                setProperty("hello", "world");
+                setProperty("theValue", "value");
+            }});
+
+        ConfigurationObjectFactory c2 = new ConfigurationObjectFactory(new Properties()
+        {{
+                setProperty("hello", "world");
+                setProperty("theValue", "value");
+            }});
+
+        Thing t = c.build(Thing.class);
+        Thing t2 = c2.build(Thing.class);
+
+        assertEquals(t.getClass(), t2.getClass());
+    }
+
+    @Test
     public void testSameConfigObjectClassUsedForEachInstance2() throws Exception
     {
 
@@ -178,8 +199,8 @@ public class TestConfigurationObjectFactory
     {
         ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties()
         {{
-                setProperty("option", "provided");
-            }});
+            setProperty("option", "provided");
+        }});
 
         Config2 config = c.build(Config2.class);
         assertEquals(config.getOption(), "provided");
