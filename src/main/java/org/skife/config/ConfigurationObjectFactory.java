@@ -1,5 +1,15 @@
 package org.skife.config;
 
+
+import net.sf.cglib.proxy.Callback;
+import net.sf.cglib.proxy.CallbackFilter;
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.Factory;
+import net.sf.cglib.proxy.FixedValue;
+import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.MethodProxy;
+import net.sf.cglib.proxy.NoOp;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -8,17 +18,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import net.sf.cglib.proxy.Callback;
-import net.sf.cglib.proxy.CallbackFilter;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.FixedValue;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
-import net.sf.cglib.proxy.NoOp;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class ConfigurationObjectFactory
 {
+    private final ConcurrentMap<Class, Factory> factories = new ConcurrentHashMap<Class, Factory>();
     private final ConfigSource config;
     private final Bully bully;
 
@@ -70,13 +75,22 @@ public class ConfigurationObjectFactory
             }
         }
 
+
+        if (factories.containsKey(configClass)) {
+
+        }
+
         Enhancer e = new Enhancer();
         e.setSuperclass(configClass);
         e.setCallbackFilter(new ConfigMagicCallbackFilter(slots));
 
         e.setCallbacks(callbacks.toArray(new Callback[callbacks.size()]));
         //noinspection unchecked
-        return (T) e.create();
+        T rt = (T) e.create();
+
+        factories.putIfAbsent(configClass, (Factory)rt);
+
+        return rt;
     }
 
     private void buildSimple(ArrayList<Callback> callbacks, Method method, Config annotation,
