@@ -1,13 +1,5 @@
 package org.skife.config;
 
-import net.sf.cglib.proxy.Callback;
-import net.sf.cglib.proxy.CallbackFilter;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.FixedValue;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
-import net.sf.cglib.proxy.NoOp;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -16,6 +8,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import net.sf.cglib.proxy.Callback;
+import net.sf.cglib.proxy.CallbackFilter;
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.FixedValue;
+import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.MethodProxy;
+import net.sf.cglib.proxy.NoOp;
 
 public class ConfigurationObjectFactory
 {
@@ -72,11 +72,8 @@ public class ConfigurationObjectFactory
 
         Enhancer e = new Enhancer();
         e.setSuperclass(configClass);
-        e.setCallbackFilter(new CallbackFilter() {
-            public int accept(Method method) {
-                return slots.containsKey(method) ? slots.get(method) : 0;
-            }
-        });
+        e.setCallbackFilter(new ConfigMagicCallbackFilter(slots));
+
         e.setCallbacks(callbacks.toArray(new Callback[callbacks.size()]));
         //noinspection unchecked
         return (T) e.create();
@@ -110,11 +107,7 @@ public class ConfigurationObjectFactory
 
         if (value != null) {
             final Object finalValue = bully.coerce(method.getReturnType(), value);
-            callbacks.add(new FixedValue() {
-                public Object loadObject() throws Exception {
-                    return finalValue;
-                }
-            });
+            callbacks.add(new ConfigMagicFixedValue(finalValue));
         }
         else if (Modifier.isAbstract(method.getModifiers())) {
             // no default (via impl or @Default) and no configured value
@@ -166,27 +159,7 @@ public class ConfigurationObjectFactory
             throw new IllegalArgumentException("Method " + method.toGenericString() + " declares config annotation but no field name!");
         }
 
-        callbacks.add(new MethodInterceptor() {
-            public Object intercept(Object o, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
-                String [] properties = annotationValues;
-
-                for (String property : properties) {
-                    if (args.length == paramTokenList.size()) {
-                        for (int i = 0; i < paramTokenList.size(); ++i) {
-                            property = property.replace(paramTokenList.get(i), String.valueOf(args[i]));
-                        }
-                        String value = config.getString(property);
-                        if (value != null) {
-                            return bully.coerce(method.getReturnType(), value);
-                        }
-                    }
-                    else {
-                        throw new IllegalStateException("Argument list doesn't match @Param list");
-                    }
-                }
-                return bulliedDefaultValue;
-            }
-        });
+        callbacks.add(new ConfigMagicMethodInterceptor(config, annotationValues, paramTokenList, bully, bulliedDefaultValue));
     }
 
     private String makeToken(String temp) {
@@ -219,5 +192,72 @@ public class ConfigurationObjectFactory
         }
 
         return sb.toString();
+    }
+
+    private static final class ConfigMagicFixedValue implements FixedValue
+    {
+    	private final Object finalValue;
+
+    	private ConfigMagicFixedValue(final Object finalValue)
+    	{
+    		this.finalValue = finalValue;
+    	}
+
+        public Object loadObject() throws Exception
+        {
+            return finalValue;
+        }
+    };
+
+
+    private static final class ConfigMagicCallbackFilter implements CallbackFilter
+    {
+    	private final Map<Method, Integer> slots;
+
+    	private ConfigMagicCallbackFilter(final Map<Method, Integer> slots)
+    	{
+    		this.slots = slots;
+    	}
+
+    	public int accept(Method method)
+    	{
+    		return slots.containsKey(method) ? slots.get(method) : 0;
+    	}
+    }
+    private static final class ConfigMagicMethodInterceptor implements MethodInterceptor
+    {
+        private final ConfigSource config;
+        private final String [] properties;
+        private final Bully bully;
+        private final Object defaultValue;
+        private final List<String> paramTokenList;
+
+        private ConfigMagicMethodInterceptor(final ConfigSource config, final String [] properties, final List<String> paramTokenList, final Bully bully, final Object defaultValue)
+        {
+            this.config = config;
+            this.properties = properties;
+            this.paramTokenList = paramTokenList;
+            this.bully = bully;
+            this.defaultValue = defaultValue;
+        }
+
+    	public Object intercept(final Object o, final Method method, final Object[] args, final MethodProxy methodProxy) throws Throwable
+    	{
+    		for (String property : properties) {
+    			if (args.length == paramTokenList.size()) {
+    				for (int i = 0; i < paramTokenList.size(); ++i) {
+    					property = property.replace(paramTokenList.get(i), String.valueOf(args[i]));
+    				}
+    				String value = config.getString(property);
+    				if (value != null) {
+    					return bully.coerce(method.getReturnType(), value);
+    				}
+    			}
+    			else {
+    				throw new IllegalStateException("Argument list doesn't match @Param list");
+    			}
+    		}
+    		return defaultValue;
+    	}
     }
 }
