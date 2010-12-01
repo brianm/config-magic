@@ -32,8 +32,8 @@ Then create the config object from the properties:
         @Default("none")
         String getWhat();
 
-   will look at 'what1' first, then at 'what2' and finally fall back to the default. 
-    
+   will look at 'what1' first, then at 'what2' and finally fall back to the default.
+
 
 # Maven dependency
 
@@ -42,7 +42,7 @@ To use config-magic in Maven projects:
     <dependency>
         <groupId>org.skife.config</groupId>
         <artifactId>config-magic</artifactId>
-        <version>0.4</version>
+        <version>0.6</version>
     </dependency>
 
 # Mailing List
