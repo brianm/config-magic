@@ -27,29 +27,35 @@ public class ConfigurationObjectFactory
     private final ConfigSource config;
     private final Bully bully;
 
-    public ConfigurationObjectFactory(Properties props) {
+    public ConfigurationObjectFactory(Properties props)
+    {
         this(new SimplePropertyConfigSource(props));
     }
 
-    public ConfigurationObjectFactory(ConfigSource config) {
+    public ConfigurationObjectFactory(ConfigSource config)
+    {
         this.config = config;
         this.bully = new Bully();
     }
 
-    public void addCoercible(final Coercible<?> coercible) {
+    public void addCoercible(final Coercible<?> coercible)
+    {
         this.bully.addCoercible(coercible);
     }
 
 
-    public <T> T buildWithReplacements(Class<T> configClass, Map<String, String> mappedReplacements) {
+    public <T> T buildWithReplacements(Class<T> configClass, Map<String, String> mappedReplacements)
+    {
         return internalBuild(configClass, mappedReplacements);
     }
 
-    public <T> T build(Class<T> configClass) {
+    public <T> T build(Class<T> configClass)
+    {
         return internalBuild(configClass, null);
     }
 
-    private <T> T internalBuild(Class<T> configClass, Map<String, String> mappedReplacements) {
+    private <T> T internalBuild(Class<T> configClass, Map<String, String> mappedReplacements)
+    {
         ArrayList<Callback> callbacks = new ArrayList<Callback>();
         final Map<Method, Integer> slots = new HashMap<Method, Integer>();
         callbacks.add(NoOp.INSTANCE);
@@ -60,7 +66,7 @@ public class ConfigurationObjectFactory
                 slots.put(method, count++);
 
                 if (method.getParameterTypes().length > 0) {
-                    if ( mappedReplacements != null ) {
+                    if (mappedReplacements != null) {
                         throw new RuntimeException("Replacements are not supported for parameterized config methods");
                     }
                     buildParameterized(callbacks, method, annotation);
@@ -71,31 +77,31 @@ public class ConfigurationObjectFactory
             }
             else if (Modifier.isAbstract(method.getModifiers())) {
                 throw new AbstractMethodError(String.format("Method [%s] does is abstract but does not have an @Config annotation",
-                        method.toGenericString()));
+                                                            method.toGenericString()));
             }
         }
 
 
         if (factories.containsKey(configClass)) {
-
+            Factory f = factories.get(configClass);
+            return (T) f.newInstance(callbacks.toArray(new Callback[callbacks.size()]));
         }
-
-        Enhancer e = new Enhancer();
-        e.setSuperclass(configClass);
-        e.setCallbackFilter(new ConfigMagicCallbackFilter(slots));
-
-        e.setCallbacks(callbacks.toArray(new Callback[callbacks.size()]));
-        //noinspection unchecked
-        T rt = (T) e.create();
-
-        factories.putIfAbsent(configClass, (Factory)rt);
-
-        return rt;
+        else {
+            Enhancer e = new Enhancer();
+            e.setSuperclass(configClass);
+            e.setCallbackFilter(new ConfigMagicCallbackFilter(slots));
+            e.setCallbacks(callbacks.toArray(new Callback[callbacks.size()]));
+            //noinspection unchecked
+            T rt = (T) e.create();
+            factories.putIfAbsent(configClass, (Factory) rt);
+            return rt;
+        }
     }
 
     private void buildSimple(ArrayList<Callback> callbacks, Method method, Config annotation,
-                             Map<String, String> mappedReplacements) {
-        String [] propertyNames = annotation.value();
+                             Map<String, String> mappedReplacements)
+    {
+        String[] propertyNames = annotation.value();
 
         if (propertyNames == null || propertyNames.length == 0) {
             throw new IllegalArgumentException("Method " + method.toGenericString() + " declares config annotation but no field name!");
@@ -104,7 +110,7 @@ public class ConfigurationObjectFactory
         String value = null;
 
         for (String propertyName : propertyNames) {
-            if ( mappedReplacements != null ) {
+            if (mappedReplacements != null) {
                 propertyName = applyReplacements(propertyName, mappedReplacements);
             }
             value = config.getString(propertyName);
@@ -133,8 +139,9 @@ public class ConfigurationObjectFactory
         }
     }
 
-    private String applyReplacements(String propertyName, Map<String, String> mappedReplacements) {
-        for ( String key : mappedReplacements.keySet() ) {
+    private String applyReplacements(String propertyName, Map<String, String> mappedReplacements)
+    {
+        for (String key : mappedReplacements.keySet()) {
             String token = makeToken(key);
             String replacement = mappedReplacements.get(key);
             propertyName = propertyName.replace(token, replacement);
@@ -142,7 +149,8 @@ public class ConfigurationObjectFactory
         return propertyName;
     }
 
-    private void buildParameterized(ArrayList<Callback> callbacks, Method method, Config annotation) {
+    private void buildParameterized(ArrayList<Callback> callbacks, Method method, Config annotation)
+    {
         if (!method.isAnnotationPresent(Default.class)) {
             throw new RuntimeException(String.format("No value present for '%s' in [%s]",
                                                      prettyPrint(annotation.value(), null), method.toGenericString()));
@@ -167,7 +175,7 @@ public class ConfigurationObjectFactory
         }
 
         final Object bulliedDefaultValue = bully.coerce(method.getReturnType(), defaultValue);
-        final String [] annotationValues = annotation.value();
+        final String[] annotationValues = annotation.value();
 
         if (annotationValues == null || annotationValues.length == 0) {
             throw new IllegalArgumentException("Method " + method.toGenericString() + " declares config annotation but no field name!");
@@ -176,11 +184,12 @@ public class ConfigurationObjectFactory
         callbacks.add(new ConfigMagicMethodInterceptor(config, annotationValues, paramTokenList, bully, bulliedDefaultValue));
     }
 
-    private String makeToken(String temp) {
+    private String makeToken(String temp)
+    {
         return "${" + temp + "}";
     }
 
-    private String prettyPrint(String [] values, final Map<String, String> mappedReplacements)
+    private String prettyPrint(String[] values, final Map<String, String> mappedReplacements)
     {
         if (values == null || values.length == 0) {
             return "";
@@ -210,43 +219,46 @@ public class ConfigurationObjectFactory
 
     private static final class ConfigMagicFixedValue implements FixedValue
     {
-    	private final Object finalValue;
+        private final Object finalValue;
 
-    	private ConfigMagicFixedValue(final Object finalValue)
-    	{
-    		this.finalValue = finalValue;
-    	}
+        private ConfigMagicFixedValue(final Object finalValue)
+        {
+            this.finalValue = finalValue;
+        }
 
         public Object loadObject() throws Exception
         {
             return finalValue;
         }
-    };
+    }
+
+    ;
 
 
     private static final class ConfigMagicCallbackFilter implements CallbackFilter
     {
-    	private final Map<Method, Integer> slots;
+        private final Map<Method, Integer> slots;
 
-    	private ConfigMagicCallbackFilter(final Map<Method, Integer> slots)
-    	{
-    		this.slots = slots;
-    	}
+        private ConfigMagicCallbackFilter(final Map<Method, Integer> slots)
+        {
+            this.slots = slots;
+        }
 
-    	public int accept(Method method)
-    	{
-    		return slots.containsKey(method) ? slots.get(method) : 0;
-    	}
+        public int accept(Method method)
+        {
+            return slots.containsKey(method) ? slots.get(method) : 0;
+        }
     }
+
     private static final class ConfigMagicMethodInterceptor implements MethodInterceptor
     {
         private final ConfigSource config;
-        private final String [] properties;
+        private final String[] properties;
         private final Bully bully;
         private final Object defaultValue;
         private final List<String> paramTokenList;
 
-        private ConfigMagicMethodInterceptor(final ConfigSource config, final String [] properties, final List<String> paramTokenList, final Bully bully, final Object defaultValue)
+        private ConfigMagicMethodInterceptor(final ConfigSource config, final String[] properties, final List<String> paramTokenList, final Bully bully, final Object defaultValue)
         {
             this.config = config;
             this.properties = properties;
@@ -255,23 +267,23 @@ public class ConfigurationObjectFactory
             this.defaultValue = defaultValue;
         }
 
-    	public Object intercept(final Object o, final Method method, final Object[] args, final MethodProxy methodProxy) throws Throwable
-    	{
-    		for (String property : properties) {
-    			if (args.length == paramTokenList.size()) {
-    				for (int i = 0; i < paramTokenList.size(); ++i) {
-    					property = property.replace(paramTokenList.get(i), String.valueOf(args[i]));
-    				}
-    				String value = config.getString(property);
-    				if (value != null) {
-    					return bully.coerce(method.getReturnType(), value);
-    				}
-    			}
-    			else {
-    				throw new IllegalStateException("Argument list doesn't match @Param list");
-    			}
-    		}
-    		return defaultValue;
-    	}
+        public Object intercept(final Object o, final Method method, final Object[] args, final MethodProxy methodProxy) throws Throwable
+        {
+            for (String property : properties) {
+                if (args.length == paramTokenList.size()) {
+                    for (int i = 0; i < paramTokenList.size(); ++i) {
+                        property = property.replace(paramTokenList.get(i), String.valueOf(args[i]));
+                    }
+                    String value = config.getString(property);
+                    if (value != null) {
+                        return bully.coerce(method.getReturnType(), value);
+                    }
+                }
+                else {
+                    throw new IllegalStateException("Argument list doesn't match @Param list");
+                }
+            }
+            return defaultValue;
+        }
     }
 }
