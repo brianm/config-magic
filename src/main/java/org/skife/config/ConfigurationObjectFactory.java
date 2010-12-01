@@ -190,7 +190,7 @@ public class ConfigurationObjectFactory
         if (values == null || values.length == 0) {
             return "";
         }
-        final StringBuilder sb = new StringBuilder('[');
+        final StringBuilder sb = new StringBuilder("[");
 
         for (int i = 0; i < values.length; i++) {
             sb.append(values[i]);
@@ -207,7 +207,7 @@ public class ConfigurationObjectFactory
                     sb.append(", ");
                 }
             }
-            sb.append(']');
+            sb.append("]");
         }
 
         return sb.toString();
