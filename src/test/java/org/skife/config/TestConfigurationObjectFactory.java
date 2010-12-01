@@ -74,6 +74,20 @@ public class TestConfigurationObjectFactory
     }
 
     @Test
+    public void testSameConfigObjectClassUsedForEachInstance() throws Exception
+    {
+        ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties() {{
+            setProperty("hello", "world");
+            setProperty("theValue", "value");
+        }});
+        Thing t = c.build(Thing.class);
+        Thing t2 = c.build(Thing.class);
+
+
+        assertEquals(t.getClass(), t2.getClass());
+    }
+
+    @Test
     public void testEnum() throws Exception {
         ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties() {{
             setProperty("option.one", "1");
@@ -118,7 +132,7 @@ public class TestConfigurationObjectFactory
         ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties() {{
             setProperty("option", "provided");
         }});
-        
+
         Config2 config = c.build(Config2.class);
         assertEquals(config.getOption(), "provided");
     }
