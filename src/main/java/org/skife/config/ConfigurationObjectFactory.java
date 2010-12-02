@@ -128,9 +128,9 @@ public class ConfigurationObjectFactory
         }
 
         if (value == null && Modifier.isAbstract(method.getModifiers())) {
-            throw new RuntimeException(String.format("No value present for '%s' in [%s]",
-                                                     prettyPrint(propertyNames, mappedReplacements),
-                                                     method.toGenericString()));
+            throw new IllegalArgumentException(String.format("No value present for '%s' in [%s]",
+                                                             prettyPrint(propertyNames, mappedReplacements),
+                                                             method.toGenericString()));
         }
         else {
             final Object finalValue = bully.coerce(method.getReturnType(), value);
@@ -151,8 +151,9 @@ public class ConfigurationObjectFactory
     private void buildParameterized(ArrayList<Callback> callbacks, Method method, Config annotation)
     {
         if (!method.isAnnotationPresent(Default.class)) {
-            throw new RuntimeException(String.format("No value present for '%s' in [%s]",
-                                                     prettyPrint(annotation.value(), null), method.toGenericString()));
+            throw new IllegalArgumentException(String.format("No value present for '%s' in [%s]",
+                                                             prettyPrint(annotation.value(), null), 
+                                                             method.toGenericString()));
         }
         String defaultValue = method.getAnnotation(Default.class).value();
 
