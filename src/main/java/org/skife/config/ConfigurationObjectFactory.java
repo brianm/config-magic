@@ -76,7 +76,7 @@ public class ConfigurationObjectFactory
                 }
             }
             else if (Modifier.isAbstract(method.getModifiers())) {
-                throw new AbstractMethodError(String.format("Method [%s] does is abstract but does not have an @Config annotation",
+                throw new AbstractMethodError(String.format("Method [%s] is abstract and lacks an @Config annotation",
                                                             method.toGenericString()));
             }
         }
@@ -104,7 +104,9 @@ public class ConfigurationObjectFactory
         String[] propertyNames = annotation.value();
 
         if (propertyNames == null || propertyNames.length == 0) {
-            throw new IllegalArgumentException("Method " + method.toGenericString() + " declares config annotation but no field name!");
+            throw new IllegalArgumentException("Method " +
+                                               method.toGenericString() +
+                                               " declares config annotation but no field name!");
         }
 
         String value = null;
@@ -127,7 +129,8 @@ public class ConfigurationObjectFactory
 
         if (value == null && Modifier.isAbstract(method.getModifiers())) {
             throw new RuntimeException(String.format("No value present for '%s' in [%s]",
-                                                     prettyPrint(propertyNames, mappedReplacements), method.toGenericString()));
+                                                     prettyPrint(propertyNames, mappedReplacements),
+                                                     method.toGenericString()));
         }
         else {
             final Object finalValue = bully.coerce(method.getReturnType(), value);
@@ -174,10 +177,16 @@ public class ConfigurationObjectFactory
         final String[] annotationValues = annotation.value();
 
         if (annotationValues == null || annotationValues.length == 0) {
-            throw new IllegalArgumentException("Method " + method.toGenericString() + " declares config annotation but no field name!");
+            throw new IllegalArgumentException("Method " +
+                                               method.toGenericString() +
+                                               " declares config annotation but no field name!");
         }
 
-        callbacks.add(new ConfigMagicMethodInterceptor(config, annotationValues, paramTokenList, bully, bulliedDefaultValue));
+        callbacks.add(new ConfigMagicMethodInterceptor(config,
+                                                       annotationValues,
+                                                       paramTokenList,
+                                                       bully,
+                                                       bulliedDefaultValue));
     }
 
     private String makeToken(String temp)
@@ -190,7 +199,7 @@ public class ConfigurationObjectFactory
         if (values == null || values.length == 0) {
             return "";
         }
-        final StringBuilder sb = new StringBuilder('[');
+        final StringBuilder sb = new StringBuilder("[");
 
         for (int i = 0; i < values.length; i++) {
             sb.append(values[i]);
@@ -207,7 +216,7 @@ public class ConfigurationObjectFactory
                     sb.append(", ");
                 }
             }
-            sb.append(']');
+            sb.append("]");
         }
 
         return sb.toString();
@@ -286,7 +295,11 @@ public class ConfigurationObjectFactory
         private final Object defaultValue;
         private final List<String> paramTokenList;
 
-        private ConfigMagicMethodInterceptor(final ConfigSource config, final String[] properties, final List<String> paramTokenList, final Bully bully, final Object defaultValue)
+        private ConfigMagicMethodInterceptor(final ConfigSource config,
+                                             final String[] properties,
+                                             final List<String> paramTokenList,
+                                             final Bully bully,
+                                             final Object defaultValue)
         {
             this.config = config;
             this.properties = properties;
@@ -295,7 +308,10 @@ public class ConfigurationObjectFactory
             this.defaultValue = defaultValue;
         }
 
-        public Object intercept(final Object o, final Method method, final Object[] args, final MethodProxy methodProxy) throws Throwable
+        public Object intercept(final Object o,
+                                final Method method,
+                                final Object[] args,
+                                final MethodProxy methodProxy) throws Throwable
         {
             for (String property : properties) {
                 if (args.length == paramTokenList.size()) {
