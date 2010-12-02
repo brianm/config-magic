@@ -7,7 +7,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TestEmptyValue
+public class TestDefaultNull
 {
     private ConfigurationObjectFactory cof = null;
 
@@ -23,59 +23,49 @@ public class TestEmptyValue
         cof = null;
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testClass()
     {
-        cof.build(EmptyClass.class);
+        EmptyClass ec = cof.build(EmptyClass.class);
+
+        Assert.assertNull(ec.getValue());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testInterface()
     {
-        cof.build(EmptyInterface.class);
+        EmptyInterface ec = cof.build(EmptyInterface.class);
+
+        Assert.assertNull(ec.getValue());
     }
 
-    @Test
-    public void testDefaultClass()
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDoubleFeature()
     {
-        EmptyDefaultClass ec = cof.build(EmptyDefaultClass.class);
-
-        Assert.assertEquals("default-value", ec.getValue());
-    }
-
-    @Test
-    public void testAbstractDefaultClass()
-    {
-        EmptyAbstractClass ec = cof.build(EmptyAbstractClass.class);
-
-        Assert.assertEquals("default-value", ec.getValue());
+        cof.build(DoubleFeature.class);
     }
 
     public static interface EmptyInterface
     {
         @Config("value")
+        @DefaultNull
         String getValue();
     }
 
     public static abstract class EmptyClass
     {
         @Config("value")
+        @DefaultNull
         public abstract String getValue();
     }
 
-    public static abstract class EmptyAbstractClass
+
+    public static class DoubleFeature
     {
         @Config("value")
-        public String getValue()
-        {
-            return "default-value";
-        }
-    }
-
-
-    public static class EmptyDefaultClass
-    {
-        @Config("value")
+        @DefaultNull
+        @Default("value-default")
         public String getValue()
         {
             return "default-value";

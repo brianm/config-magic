@@ -1,11 +1,9 @@
 package org.skife.config;
 
-
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.CallbackFilter;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.Factory;
-import net.sf.cglib.proxy.FixedValue;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import net.sf.cglib.proxy.NoOp;
@@ -23,7 +21,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public class ConfigurationObjectFactory
 {
-    private static final ConcurrentMap<Class, Factory> factories = new ConcurrentHashMap<Class, Factory>();
+    private static final ConcurrentMap<Class<?>, Factory> factories = new ConcurrentHashMap<Class<?>, Factory>();
     private final ConfigSource config;
     private final Bully bully;
 
@@ -123,19 +121,43 @@ public class ConfigurationObjectFactory
             }
         }
 
-        if (value == null && method.isAnnotationPresent(Default.class)) {
-            value = method.getAnnotation(Default.class).value();
+        final boolean hasDefault = method.isAnnotationPresent(Default.class);
+        final boolean hasDefaultNull = method.isAnnotationPresent(DefaultNull.class);
+
+        if (hasDefault && hasDefaultNull) {
+        	throw new IllegalArgumentException(String.format("@Default and @DefaultNull present in [%s]", method.toGenericString()));
         }
 
-        if (value == null && Modifier.isAbstract(method.getModifiers())) {
-            throw new IllegalArgumentException(String.format("No value present for '%s' in [%s]",
-                                                             prettyPrint(propertyNames, mappedReplacements),
-                                                             method.toGenericString()));
+        boolean useMethod = false;
+
+        //
+        // This is how the value logic works if no value has been set by the config:
+        //
+        // - if the @Default annotation is present, use its value.
+        // - if the @DefaultNull annotation is present, accept null as the value
+        // - otherwise, check whether the method is not abstract. If it is not, mark the callback that it should call the method and
+        //   ignore the passed in value (which will be null)
+        // - if all else fails, throw an exception.
+        //
+        if (value == null) {
+        	if (hasDefault) {
+        		value = method.getAnnotation(Default.class).value();
+        	}
+        	else if (!hasDefaultNull) {
+        		// Final try: Is the method is actually callable?
+        		if (!Modifier.isAbstract(method.getModifiers())) {
+        			useMethod = true;
+        		}
+        		else {
+        			throw new IllegalArgumentException(String.format("No value present for '%s' in [%s]",
+        					prettyPrint(propertyNames, mappedReplacements),
+        					method.toGenericString()));
+        		}
+        	}
         }
-        else {
-            final Object finalValue = bully.coerce(method.getReturnType(), value);
-            callbacks.add(new ConfigMagicFixedValue(finalValue));
-        }
+
+        final Object finalValue = bully.coerce(method.getReturnType(), value);
+        callbacks.add(new ConfigMagicFixedValue(finalValue, useMethod));
     }
 
     private String applyReplacements(String propertyName, Map<String, String> mappedReplacements)
@@ -150,14 +172,25 @@ public class ConfigurationObjectFactory
 
     private void buildParameterized(ArrayList<Callback> callbacks, Method method, Config annotation)
     {
-        if (!method.isAnnotationPresent(Default.class)) {
-            throw new IllegalArgumentException(String.format("No value present for '%s' in [%s]",
-                                                             prettyPrint(annotation.value(), null), 
-                                                             method.toGenericString()));
-        }
-        String defaultValue = method.getAnnotation(Default.class).value();
+        String defaultValue = null;
 
-        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        final boolean hasDefault = method.isAnnotationPresent(Default.class);
+        final boolean hasDefaultNull = method.isAnnotationPresent(DefaultNull.class);
+
+        if (hasDefault && hasDefaultNull) {
+        	throw new IllegalArgumentException(String.format("@Default and @DefaultNull present in [%s]", method.toGenericString()));
+        }
+
+        if (hasDefault) {
+            defaultValue = method.getAnnotation(Default.class).value();
+        }
+        else if (!hasDefaultNull) {
+        	throw new IllegalArgumentException(String.format("No value present for '%s' in [%s]",
+        			prettyPrint(annotation.value(), null),
+        			method.toGenericString()));
+        }
+
+        final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         final List<String> paramTokenList = new ArrayList<String>();
         for (Annotation[] parameterTab : parameterAnnotations) {
             for (Annotation parameter : parameterTab) {
@@ -227,13 +260,14 @@ public class ConfigurationObjectFactory
     {
         private final Handler handler;
 
-        private ConfigMagicFixedValue(final Object finalValue)
+        private ConfigMagicFixedValue(final Object value, final boolean callSuper)
         {
-            if (finalValue == null) {
+        	// This is a workaround for broken cglib
+            if (callSuper) {
                 this.handler = new InvokeSuperHandler();
             }
             else {
-                handler = new FixedValueHandler(finalValue);
+                handler = new FixedValueHandler(value);
             }
         }
 

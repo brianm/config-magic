@@ -4,10 +4,10 @@
     <artifactId>config-magic</artifactId>
     <packaging>jar</packaging>
     <version>0.7-SNAPSHOT</version>
-    <name>skife-config</name>
+    <name>config-magic</name>
     <url>http://github.com/brianm/config-magic</url>
     <description>
-        A configguration object convenience librray.
+        A configuration object convenience library.
     </description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
