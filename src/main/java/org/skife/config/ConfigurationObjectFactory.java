@@ -156,7 +156,7 @@ public class ConfigurationObjectFactory
         	}
         }
 
-        final Object finalValue = bully.coerce(method.getReturnType(), value);
+        final Object finalValue = bully.coerce(method.getGenericReturnType(), value);
         callbacks.add(new ConfigMagicFixedValue(finalValue, useMethod));
     }
 
@@ -207,7 +207,7 @@ public class ConfigurationObjectFactory
                                                      method.toGenericString()));
         }
 
-        final Object bulliedDefaultValue = bully.coerce(method.getReturnType(), defaultValue);
+        final Object bulliedDefaultValue = bully.coerce(method.getGenericReturnType(), defaultValue);
         final String[] annotationValues = annotation.value();
 
         if (annotationValues == null || annotationValues.length == 0) {
@@ -355,7 +355,7 @@ public class ConfigurationObjectFactory
                     }
                     String value = config.getString(property);
                     if (value != null) {
-                        return bully.coerce(method.getReturnType(), value);
+                        return bully.coerce(method.getGenericReturnType(), value);
                     }
                 }
                 else {

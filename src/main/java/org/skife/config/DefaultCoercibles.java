@@ -286,7 +286,7 @@ final class DefaultCoercibles
         }
     };
 
-    private static final RuntimeException convertException(final Throwable t)
+    public static final RuntimeException convertException(final Throwable t)
     {
         if (t instanceof RuntimeException) {
             return (RuntimeException) t;
