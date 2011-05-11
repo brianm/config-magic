@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -121,7 +122,7 @@ class Bully
             String[] tokens = value.split("\\s*,\\s*");
             Collection result = null;
             if (Set.class.equals(containerType)) {
-                result = new HashSet(tokens.length);
+                result = new LinkedHashSet(tokens.length);
             }
             else if (Collection.class.equals(containerType) || List.class.equals(containerType)) {
                 result = new ArrayList(tokens.length);
