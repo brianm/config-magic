@@ -118,7 +118,7 @@ final class DefaultCoercibles
                     // not static.
                     candidate = null;
                 }
-                else if (candidate.getReturnType() != type) {
+                else if (!candidate.getReturnType().isAssignableFrom(type)) {
                     // does not return the right type.
                     candidate = null;
                 }
@@ -130,7 +130,7 @@ final class DefaultCoercibles
                         public Object coerce(final String value)
                         {
                             try {
-                                return valueOfMethod.invoke(null, value);
+                                return value == null ? null : valueOfMethod.invoke(null, value);
                             }
                             catch (Exception e) {
                                 throw convertException(e);
@@ -172,7 +172,7 @@ final class DefaultCoercibles
                     public Object coerce(final String value)
                     {
                         try {
-                            return ctor.newInstance(value);
+                            return value == null ? null : ctor.newInstance(value);
                         }
                         catch (Exception e) {
                             throw convertException(e);
@@ -286,8 +286,7 @@ final class DefaultCoercibles
         }
     };
 
-
-    private static final RuntimeException convertException(final Throwable t)
+    public static final RuntimeException convertException(final Throwable t)
     {
         if (t instanceof RuntimeException) {
             return (RuntimeException) t;
