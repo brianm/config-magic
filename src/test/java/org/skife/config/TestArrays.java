@@ -1,8 +1,5 @@
 package org.skife.config;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Properties;
 import org.junit.After;
 import org.junit.Assert;
@@ -73,6 +70,14 @@ public class TestArrays
         Assert.assertNull(ec.getValue());
     }
 
+    @Test
+    public void testInterfaceDefaultEmptyString()
+    {
+        EmptyInterfaceEmptyString ec = cof.build(EmptyInterfaceEmptyString.class);
+
+        Assert.assertArrayEquals(new int[0], ec.getValue());
+    }
+
     public static enum TestEnum
     {
         ONE,
@@ -129,5 +134,12 @@ public class TestArrays
         @Config("value")
         @DefaultNull
         public TestEnum[] getValue();
+    }
+
+    public static interface EmptyInterfaceEmptyString
+    {
+        @Config("value")
+        @Default("")
+        public int[] getValue();
     }
 }
