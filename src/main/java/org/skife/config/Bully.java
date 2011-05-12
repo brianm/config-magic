@@ -100,6 +100,9 @@ class Bully
         if (value == null) {
             return null;
         }
+        else if (value.length() == 0) {
+            return Array.newInstance(elemType, 0);
+        }
         else {
             String[] tokens = value.split("\\s*,\\s*");
             Object targetArray = Array.newInstance(elemType, tokens.length);
@@ -117,13 +120,13 @@ class Bully
             return null;
         }
         else {
-            String[] tokens = value.split("\\s*,\\s*");
             Collection result = null;
+
             if (Set.class.equals(containerType)) {
-                result = new LinkedHashSet(tokens.length);
+                result = new LinkedHashSet();
             }
             else if (Collection.class.equals(containerType) || List.class.equals(containerType)) {
-                result = new ArrayList(tokens.length);
+                result = new ArrayList();
             }
             else if (Collection.class.isAssignableFrom(containerType)) {
                 try {
@@ -140,8 +143,10 @@ class Bully
             if (result == null) {
                 throw new IllegalStateException(String.format("Don't know how to handle a '%s' container type for value '%s'", containerType, value));
             }
-            for (String token : tokens) {
-                result.add(coerce(elemType, token));
+            if (value.length() > 0) {
+                for (String token : value.split("\\s*,\\s*")) {
+                    result.add(coerce(elemType, token));
+                }
             }
             return result;
         }

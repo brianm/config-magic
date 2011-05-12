@@ -85,6 +85,14 @@ public class TestCollections
         Assert.assertNull(ec.getValue());
     }
 
+    @Test
+    public void testInterfaceDefaultEmptyString()
+    {
+        EmptyInterfaceEmptyString ec = cof.build(EmptyInterfaceEmptyString.class);
+
+        Assert.assertEquals(Collections.emptyList(), ec.getValue());
+    }
+
     public static enum TestEnum
     {
         ONE,
@@ -150,6 +158,13 @@ public class TestCollections
     {
         @Config("value")
         @DefaultNull
+        public List<TestEnum> getValue();
+    }
+
+    public static interface EmptyInterfaceEmptyString
+    {
+        @Config("value")
+        @Default("")
         public List<TestEnum> getValue();
     }
 }
