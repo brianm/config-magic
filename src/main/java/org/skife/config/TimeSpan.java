@@ -16,7 +16,7 @@ public class TimeSpan
     {
         Matcher m = SPLIT.matcher(spec);
         if (!m.matches()) {
-            throw new IllegalArgumentException(String.format("%s is not a vlid time spec", spec));
+            throw new IllegalArgumentException(String.format("%s is not a valid time spec", spec));
         }
         String number = m.group(1);
         String type = m.group(2);
@@ -51,6 +51,16 @@ public class TimeSpan
 
     public long getMillis() {
         return millis;
+    }
+
+    public long getPeriod()
+    {
+        return period;
+    }
+
+    public TimeUnit getUnit()
+    {
+        return unit;
     }
 
     public String toString()
@@ -90,15 +100,5 @@ public class TimeSpan
         TimeSpan other = (TimeSpan)obj;
 
         return millis == other.millis;
-    }
-
-    public long getPeriod()
-    {
-        return period;
-    }
-
-    public TimeUnit getUnit()
-    {
-        return unit;
     }
 }
