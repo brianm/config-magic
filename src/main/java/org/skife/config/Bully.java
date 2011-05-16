@@ -70,12 +70,12 @@ class Bully
         mappings.clear();
     }
 
-    public synchronized Object coerce(Type type, String value) {
+    public synchronized Object coerce(Type type, String value, Separator separator) {
         if (type instanceof Class) {
             Class<?> clazz = (Class<?>)type;
 
             if (clazz.isArray()) {
-                return coerceArray(clazz.getComponentType(), value);
+                return coerceArray(clazz.getComponentType(), value, separator);
             }
             else {
                 return coerce(clazz, value);
@@ -89,14 +89,14 @@ class Bully
                 Type[] args = parameterizedType.getActualTypeArguments();
 
                 if (args != null && args.length == 1 && args[0] instanceof Class<?>) {
-                    return coerceCollection((Class<?>)rawType, (Class<?>)args[0], value);
+                    return coerceCollection((Class<?>)rawType, (Class<?>)args[0], value, separator);
                 }
             }
         }
         throw new IllegalStateException(String.format("Don't know how to handle a '%s' type for value '%s'", type, value));
     }
 
-    private Object coerceArray(Class<?> elemType, String value) {
+    private Object coerceArray(Class<?> elemType, String value, Separator separator) {
         if (value == null) {
             return null;
         }
@@ -104,7 +104,7 @@ class Bully
             return Array.newInstance(elemType, 0);
         }
         else {
-            String[] tokens = value.split("\\s*,\\s*");
+            String[] tokens = value.split(separator == null ? Separator.DEFAULT : separator.value());
             Object targetArray = Array.newInstance(elemType, tokens.length);
 
             for (int idx = 0; idx < tokens.length; idx++) {
@@ -115,7 +115,7 @@ class Bully
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Object coerceCollection(Class<?> containerType, Class<?> elemType, String value) {
+    private Object coerceCollection(Class<?> containerType, Class<?> elemType, String value, Separator separator) {
         if (value == null) {
             return null;
         }
@@ -144,7 +144,7 @@ class Bully
                 throw new IllegalStateException(String.format("Don't know how to handle a '%s' container type for value '%s'", containerType, value));
             }
             if (value.length() > 0) {
-                for (String token : value.split("\\s*,\\s*")) {
+                for (String token : value.split(separator == null ? Separator.DEFAULT : separator.value())) {
                     result.add(coerce(elemType, token));
                 }
             }

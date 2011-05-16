@@ -78,6 +78,14 @@ public class TestArrays
         Assert.assertArrayEquals(new int[0], ec.getValue());
     }
 
+    @Test
+    public void testDifferentSeparator()
+    {
+        DifferentSeparator ec = cof.build(DifferentSeparator.class);
+
+        Assert.assertArrayEquals(new float[] { 1.0f, 2.0f }, ec.getValue(), 0.0f);
+    }
+
     public static enum TestEnum
     {
         ONE,
@@ -141,5 +149,13 @@ public class TestArrays
         @Config("value")
         @Default("")
         public int[] getValue();
+    }
+
+    public static interface DifferentSeparator
+    {
+        @Config("value")
+        @Separator("\\s*;\\s*")
+        @Default("1.0 ; 2.0")
+        public float[] getValue();
     }
 }

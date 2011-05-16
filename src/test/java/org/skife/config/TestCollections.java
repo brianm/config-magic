@@ -93,6 +93,14 @@ public class TestCollections
         Assert.assertEquals(Collections.emptyList(), ec.getValue());
     }
 
+    @Test
+    public void testDifferentSeparator()
+    {
+        DifferentSeparator ec = cof.build(DifferentSeparator.class);
+
+        Assert.assertEquals(new HashSet<TestEnum>(Arrays.asList(TestEnum.TWO, TestEnum.ONE)), ec.getValue());
+    }
+
     public static enum TestEnum
     {
         ONE,
@@ -166,5 +174,14 @@ public class TestCollections
         @Config("value")
         @Default("")
         public List<TestEnum> getValue();
+    }
+
+
+    public static interface DifferentSeparator
+    {
+        @Config("value")
+        @Separator("\\s*!\\s*")
+        @Default("TWO ! ONE")
+        public Set<TestEnum> getValue();
     }
 }
