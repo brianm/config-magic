@@ -18,9 +18,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConfigurationObjectFactory
 {
+    private static final Logger logger = LoggerFactory.getLogger(ConfigurationObjectFactory.class);
     private static final ConcurrentMap<Class<?>, Factory> factories = new ConcurrentHashMap<Class<?>, Factory>();
     private final ConfigSource config;
     private final Bully bully;
@@ -117,6 +120,8 @@ public class ConfigurationObjectFactory
 
             // First value found wins
             if (value != null) {
+                logger.info("Assigning value [{}] for [{}] on [{}#{}()]",
+                            new Object[] { value, propertyName, method.getDeclaringClass().getName(), method.getName() });
                 break;
             }
         }
@@ -125,7 +130,7 @@ public class ConfigurationObjectFactory
         final boolean hasDefaultNull = method.isAnnotationPresent(DefaultNull.class);
 
         if (hasDefault && hasDefaultNull) {
-        	throw new IllegalArgumentException(String.format("@Default and @DefaultNull present in [%s]", method.toGenericString()));
+            throw new IllegalArgumentException(String.format("@Default and @DefaultNull present in [%s]", method.toGenericString()));
         }
 
         boolean useMethod = false;
@@ -140,20 +145,29 @@ public class ConfigurationObjectFactory
         // - if all else fails, throw an exception.
         //
         if (value == null) {
-        	if (hasDefault) {
-        		value = method.getAnnotation(Default.class).value();
-        	}
-        	else if (!hasDefaultNull) {
-        		// Final try: Is the method is actually callable?
-        		if (!Modifier.isAbstract(method.getModifiers())) {
-        			useMethod = true;
-        		}
-        		else {
-        			throw new IllegalArgumentException(String.format("No value present for '%s' in [%s]",
-        					prettyPrint(propertyNames, mappedReplacements),
-        					method.toGenericString()));
-        		}
-        	}
+            if (hasDefault) {
+                value = method.getAnnotation(Default.class).value();
+
+                logger.info("Assigning default value [{}] for {} on [{}#{}()]",
+                            new Object[] { value, propertyNames, method.getDeclaringClass().getName(), method.getName() });
+            }
+            else if (hasDefaultNull) {
+                logger.info("Assigning null default value for {} on [{}#{}()]",
+                            new Object[] { propertyNames, method.getDeclaringClass().getName(), method.getName() });
+            }
+            else {
+                // Final try: Is the method is actually callable?
+                if (!Modifier.isAbstract(method.getModifiers())) {
+                    useMethod = true;
+                    logger.info("Using method itself for {} on [{}#{}()]",
+                                new Object[] { propertyNames, method.getDeclaringClass().getName(), method.getName() });
+                }
+                else {
+                    throw new IllegalArgumentException(String.format("No value present for '%s' in [%s]",
+                            prettyPrint(propertyNames, mappedReplacements),
+                            method.toGenericString()));
+                }
+            }
         }
 
         final Object finalValue = bully.coerce(method.getGenericReturnType(), value, method.getAnnotation(Separator.class));
@@ -178,16 +192,16 @@ public class ConfigurationObjectFactory
         final boolean hasDefaultNull = method.isAnnotationPresent(DefaultNull.class);
 
         if (hasDefault && hasDefaultNull) {
-        	throw new IllegalArgumentException(String.format("@Default and @DefaultNull present in [%s]", method.toGenericString()));
+            throw new IllegalArgumentException(String.format("@Default and @DefaultNull present in [%s]", method.toGenericString()));
         }
 
         if (hasDefault) {
             defaultValue = method.getAnnotation(Default.class).value();
         }
         else if (!hasDefaultNull) {
-        	throw new IllegalArgumentException(String.format("No value present for '%s' in [%s]",
-        			prettyPrint(annotation.value(), null),
-        			method.toGenericString()));
+            throw new IllegalArgumentException(String.format("No value present for '%s' in [%s]",
+                    prettyPrint(annotation.value(), null),
+                    method.toGenericString()));
         }
 
         final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
@@ -262,7 +276,7 @@ public class ConfigurationObjectFactory
 
         private ConfigMagicFixedValue(final Object value, final boolean callSuper)
         {
-        	// This is a workaround for broken cglib
+            // This is a workaround for broken cglib
             if (callSuper) {
                 this.handler = new InvokeSuperHandler();
             }
@@ -350,11 +364,13 @@ public class ConfigurationObjectFactory
         {
             for (String property : properties) {
                 if (args.length == paramTokenList.size()) {
-                    for (int i = 0; i < paramTokenList.size(); ++i) {
+                    for (int i = 0; i < args.length; ++i) {
                         property = property.replace(paramTokenList.get(i), String.valueOf(args[i]));
                     }
                     String value = config.getString(property);
                     if (value != null) {
+                        logger.info("Assigning value [{}] for [{}] on [{}#{}()]",
+                                    new Object[] { value, property, method.getDeclaringClass().getName(), method.getName() });
                         return bully.coerce(method.getGenericReturnType(), value, method.getAnnotation(Separator.class));
                     }
                 }
@@ -362,6 +378,8 @@ public class ConfigurationObjectFactory
                     throw new IllegalStateException("Argument list doesn't match @Param list");
                 }
             }
+            logger.info("Assigning default value [{}] for {} on [{}#{}()]",
+                        new Object[] { defaultValue, properties, method.getDeclaringClass().getName(), method.getName() });
             return defaultValue;
         }
     }
