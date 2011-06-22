@@ -282,7 +282,7 @@ final class DefaultCoercibles
 
     static final Coercer<URI> URI_COERCER = new Coercer<URI>() {
         public URI coerce(final String value) {
-            return URI.create(value);
+            return value != null ? URI.create(value) : null;
         }
     };
 

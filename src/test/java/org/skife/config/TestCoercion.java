@@ -40,4 +40,24 @@ public class TestCoercion
         CoercionConfig cc = c.build(CoercionConfig.class);
         Assert.assertThat(cc.getURI(), is(URI.create("http://github.org/brianm/config-magic")));
     }
+
+    @Test
+    public void testEmptyURI()
+    {
+        final EmptyUriConfig euc1 = new EmptyUriConfig() {};
+        Assert.assertNull(euc1.getTheUri());
+
+        final EmptyUriConfig euc2 = c.build(EmptyUriConfig.class);
+        Assert.assertNull(euc2.getTheUri());
+    }
+
+    public static abstract class EmptyUriConfig
+    {
+        @Config("the-uri")
+        @DefaultNull
+        public URI getTheUri()
+        {
+            return null;
+        }
+    }
 }
