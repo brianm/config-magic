@@ -60,4 +60,25 @@ public class TestCoercion
             return null;
         }
     }
+
+    @Test
+    public void testNullDouble()
+    {
+        final NullDoubleConfig ndc1 = new NullDoubleConfig() {};
+        Assert.assertNull(ndc1.getTheNumber());
+
+        final NullDoubleConfig ndc2 = c.build(NullDoubleConfig.class);
+        Assert.assertNull(ndc2.getTheNumber());
+    }
+
+
+    public static abstract class NullDoubleConfig
+    {
+        @Config("the-number")
+        @DefaultNull
+        public Double getTheNumber()
+        {
+            return null;
+        }
+    }
 }

@@ -234,43 +234,43 @@ final class DefaultCoercibles
 
     static final Coercer<Boolean> BOOLEAN_COERCER = new Coercer<Boolean>() {
         public Boolean coerce(final String value) {
-            return Boolean.valueOf(value);
+            return value != null ? Boolean.valueOf(value) : null;
         }
     };
 
     static final Coercer<Byte> BYTE_COERCER = new Coercer<Byte>() {
         public Byte coerce(final String value) {
-            return Byte.valueOf(value);
+            return value != null ? Byte.valueOf(value) : null;
         }
     };
 
     static final Coercer<Short> SHORT_COERCER = new Coercer<Short>() {
         public Short coerce(final String value) {
-            return Short.valueOf(value);
+            return value != null ? Short.valueOf(value) : null;
         }
     };
 
     static final Coercer<Integer> INTEGER_COERCER = new Coercer<Integer>() {
         public Integer coerce(final String value) {
-            return Integer.valueOf(value);
+            return value != null ? Integer.valueOf(value) : null;
         }
     };
 
     static final Coercer<Long> LONG_COERCER = new Coercer<Long>() {
         public Long coerce(final String value) {
-            return Long.valueOf(value);
+            return value != null ? Long.valueOf(value) : null;
         }
     };
 
     static final Coercer<Float> FLOAT_COERCER = new Coercer<Float>() {
         public Float coerce(final String value) {
-            return Float.valueOf(value);
+            return value != null ? Float.valueOf(value) : null;
         }
     };
 
     static final Coercer<Double> DOUBLE_COERCER = new Coercer<Double>() {
         public Double coerce(final String value) {
-            return Double.valueOf(value);
+            return value != null ? Double.valueOf(value) : null;
         }
     };
 
