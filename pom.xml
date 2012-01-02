@@ -23,8 +23,7 @@
 
     <scm>
         <connection>scm:git:git://github.com/brianm/config-magic.git</connection>
-        <developerConnection>scm:git:git://github.com/brianm/config-magic.git</developerConnection>
-        <!--<developerConnection>scm:git@github.com:brianm/config-magic.git</developerConnection>-->
+        <developerConnection>scm:git:git@github.com:brianm/config-magic.git</developerConnection>
         <url>http://github.com/brianm/config-magic/tree/master</url>
     </scm>
 
