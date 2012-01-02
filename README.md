@@ -42,7 +42,7 @@ To use config-magic in Maven projects:
     <dependency>
         <groupId>org.skife.config</groupId>
         <artifactId>config-magic</artifactId>
-        <version>0.6</version>
+        <version>0.9</version>
     </dependency>
 
 # Mailing List

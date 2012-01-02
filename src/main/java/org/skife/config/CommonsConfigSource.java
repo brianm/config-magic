@@ -1,7 +1,6 @@
 package org.skife.config;
 
 import org.apache.commons.configuration.Configuration;
-import org.apache.commons.lang.StringUtils;
 
 public class CommonsConfigSource implements ConfigSource
 {
@@ -17,6 +16,13 @@ public class CommonsConfigSource implements ConfigSource
         if (strings == null || strings.length == 0) {
             return null;
         }
-        return StringUtils.join(strings, ",");
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < strings.length; i++) {
+            sb.append(strings[i]);
+            if (i < strings.length - 1) {
+                sb.append(',');
+            }
+        }
+        return sb.toString();
     }
 }
