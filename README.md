@@ -28,7 +28,7 @@ Then create the config object from the properties:
 
 # Default values
 
-    Using @Default() can set arbitrary default values. To set 'null' as the default value, use the @DefaultNull annotation.
+Using @Default() can set arbitrary default values. To set 'null' as the default value, use the @DefaultNull annotation.
 
 # Advanced usage
 
