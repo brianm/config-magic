@@ -26,6 +26,10 @@ Then create the config object from the properties:
     ConfigurationObjectFactory factory = new ConfigurationObjectFactory(props);
     MyConfig conf = factory.build(MyConfig.class);
 
+# Default values
+
+    Using @Default() can set arbitrary default values. To set 'null' as the default value, use the @DefaultNull annotation.
+
 # Advanced usage
 
         @Config({"what1", "what2"})
@@ -33,7 +37,6 @@ Then create the config object from the properties:
         String getWhat();
 
    will look at 'what1' first, then at 'what2' and finally fall back to the default.
-
 
 # Maven dependency
 
