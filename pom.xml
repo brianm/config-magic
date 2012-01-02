@@ -248,6 +248,10 @@
             <id>arosien</id>
             <name>Adam Rosien</name>
         </developer>
+        <developer>
+            <id>hgschmie</id>
+            <name>Henning Schmiedehausen</name>
+        </developer>
     </developers>
 
 </project>
