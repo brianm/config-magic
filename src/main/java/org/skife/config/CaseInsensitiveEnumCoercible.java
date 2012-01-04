@@ -2,6 +2,9 @@ package org.skife.config;
 
 import java.util.Arrays;
 
+/**
+ * Do case insensitive string comparisons for determination of enum value matches.
+ */
 public class CaseInsensitiveEnumCoercible implements Coercible<Object>
 {
     public Coercer<Object> accept(final Class<?> clazz)
