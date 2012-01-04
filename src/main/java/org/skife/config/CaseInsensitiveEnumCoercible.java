@@ -25,6 +25,9 @@ public class CaseInsensitiveEnumCoercible implements Coercible<Object>
         {
             public Object coerce(String value)
             {
+                if (value == null) {
+                    return null;
+                }
                 for (Object o : values) {
                     if (value.equalsIgnoreCase(o.toString())) {
                         return o;

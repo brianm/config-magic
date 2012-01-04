@@ -12,7 +12,6 @@ public class TestCaseInsensitiveEnumCoercible
     public void testHappyPath() throws Exception
     {
         ConfigurationObjectFactory cof = new ConfigurationObjectFactory(Props.of("creamer", "half_and_half"));
-        cof.addCoercible(new CaseInsensitiveEnumCoercible());
 
         Coffee coffee = cof.build(Coffee.class);
         assertThat(coffee.getCreamer(), equalTo(Creamer.HALF_AND_HALF));
@@ -23,10 +22,19 @@ public class TestCaseInsensitiveEnumCoercible
     public void testNoMatch() throws Exception
     {
         ConfigurationObjectFactory cof = new ConfigurationObjectFactory(Props.of("creamer", "goat_milk"));
-        cof.addCoercible(new CaseInsensitiveEnumCoercible());
 
         Coffee coffee = cof.build(Coffee.class);
         fail("should have raised an illegal state exception");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testExactMatch() throws Exception
+    {
+        ConfigurationObjectFactory cof = new ConfigurationObjectFactory(Props.of("creamer", "whole_milk"));
+        cof.addCoercible(new ExactMatchEnumCoercible());
+
+        Coffee coffee = cof.build(Coffee.class);
+        fail("should have raised an exception");
     }
 
     public static abstract class Coffee

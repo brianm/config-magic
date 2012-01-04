@@ -38,12 +38,12 @@ public class TestEnums
 
         Assert.assertEquals(TestEnum.TWO, ec.getValue());
     }
-    
+
     @Test
     public void testInterface()
     {
         EmptyInterface ec = cof.build(EmptyInterface.class);
-        
+
         Assert.assertEquals(TestEnum.THREE, ec.getValue());
     }
 
@@ -105,7 +105,7 @@ public class TestEnums
             return TestEnum.THREE;
         }
     }
-    
+
     public static interface EmptyInterface
     {
         @Config("value")

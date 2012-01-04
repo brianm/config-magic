@@ -10,9 +10,12 @@ import java.util.Map;
 
 final class DefaultCoercibles
 {
+
     private DefaultCoercibles()
     {
     }
+
+    public static final Coercible<?> CASE_INSENSITIVE_ENUM_COERCIBLE = new CaseInsensitiveEnumCoercible();
 
     static final Coercible<Boolean> BOOLEAN_COERCIBLE = new Coercible<Boolean>() {
         public Coercer<Boolean> accept(final Class<?> clazz) {
