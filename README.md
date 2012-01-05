@@ -26,6 +26,10 @@ Then create the config object from the properties:
     ConfigurationObjectFactory factory = new ConfigurationObjectFactory(props);
     MyConfig conf = factory.build(MyConfig.class);
 
+# Default values
+
+Using @Default() can set arbitrary default values. To set 'null' as the default value, use the @DefaultNull annotation.
+
 # Advanced usage
 
         @Config({"what1", "what2"})
@@ -34,7 +38,6 @@ Then create the config object from the properties:
 
    will look at 'what1' first, then at 'what2' and finally fall back to the default.
 
-
 # Maven dependency
 
 To use config-magic in Maven projects:
@@ -42,7 +45,7 @@ To use config-magic in Maven projects:
     <dependency>
         <groupId>org.skife.config</groupId>
         <artifactId>config-magic</artifactId>
-        <version>0.6</version>
+        <version>0.11</version>
     </dependency>
 
 # Mailing List

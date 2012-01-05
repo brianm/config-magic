@@ -37,6 +37,7 @@ class Bully
         // Look Brian, now it groks URIs. ;-)
         typeCoercibles.add(DefaultCoercibles.URI_COERCIBLE);
 
+        defaultCoercibles.add(DefaultCoercibles.CASE_INSENSITIVE_ENUM_COERCIBLE);
         defaultCoercibles.add(DefaultCoercibles.VALUE_OF_COERCIBLE);
         defaultCoercibles.add(DefaultCoercibles.STRING_CTOR_COERCIBLE);
         defaultCoercibles.add(DefaultCoercibles.OBJECT_CTOR_COERCIBLE);

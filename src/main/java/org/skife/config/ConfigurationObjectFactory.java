@@ -57,10 +57,20 @@ public class ConfigurationObjectFactory
 
     private <T> T internalBuild(Class<T> configClass, Map<String, String> mappedReplacements)
     {
-        ArrayList<Callback> callbacks = new ArrayList<Callback>();
+        final List<Callback> callbacks = new ArrayList<Callback>();
         final Map<Method, Integer> slots = new HashMap<Method, Integer>();
         callbacks.add(NoOp.INSTANCE);
+
         int count = 1;
+
+        // Hook up a toString method that prints out the settings for that bean if possible.
+        final Method toStringMethod = findToStringMethod(configClass);
+        if (toStringMethod != null) {
+            slots.put(toStringMethod, count++);
+            callbacks.add(new ConfigMagicBeanToString(callbacks));
+        }
+
+        // Now hook up the actual value interceptors.
         for (final Method method : configClass.getMethods()) {
             if (method.isAnnotationPresent(Config.class)) {
                 final Config annotation = method.getAnnotation(Config.class);
@@ -99,7 +109,7 @@ public class ConfigurationObjectFactory
         }
     }
 
-    private void buildSimple(ArrayList<Callback> callbacks, Method method, Config annotation,
+    private void buildSimple(List<Callback> callbacks, Method method, Config annotation,
                              Map<String, String> mappedReplacements)
     {
         String[] propertyNames = annotation.value();
@@ -112,6 +122,8 @@ public class ConfigurationObjectFactory
 
         String value = null;
 
+        String assignedFrom = null;
+
         for (String propertyName : propertyNames) {
             if (mappedReplacements != null) {
                 propertyName = applyReplacements(propertyName, mappedReplacements);
@@ -120,6 +132,7 @@ public class ConfigurationObjectFactory
 
             // First value found wins
             if (value != null) {
+                assignedFrom = "property: '" + propertyName + "'";
                 logger.info("Assigning value [{}] for [{}] on [{}#{}()]",
                             new Object[] { value, propertyName, method.getDeclaringClass().getName(), method.getName() });
                 break;
@@ -147,6 +160,7 @@ public class ConfigurationObjectFactory
         if (value == null) {
             if (hasDefault) {
                 value = method.getAnnotation(Default.class).value();
+                assignedFrom = "annotation: @Default";
 
                 logger.info("Assigning default value [{}] for {} on [{}#{}()]",
                             new Object[] { value, propertyNames, method.getDeclaringClass().getName(), method.getName() });
@@ -154,11 +168,13 @@ public class ConfigurationObjectFactory
             else if (hasDefaultNull) {
                 logger.info("Assigning null default value for {} on [{}#{}()]",
                             new Object[] { propertyNames, method.getDeclaringClass().getName(), method.getName() });
+                assignedFrom = "annotation: @DefaultNull";
             }
             else {
                 // Final try: Is the method is actually callable?
                 if (!Modifier.isAbstract(method.getModifiers())) {
                     useMethod = true;
+                    assignedFrom = "method: '" + method.getName() + "()'";
                     logger.info("Using method itself for {} on [{}#{}()]",
                                 new Object[] { propertyNames, method.getDeclaringClass().getName(), method.getName() });
                 }
@@ -171,7 +187,7 @@ public class ConfigurationObjectFactory
         }
 
         final Object finalValue = bully.coerce(method.getGenericReturnType(), value, method.getAnnotation(Separator.class));
-        callbacks.add(new ConfigMagicFixedValue(finalValue, useMethod));
+        callbacks.add(new ConfigMagicFixedValue(method, assignedFrom, finalValue, useMethod));
     }
 
     private String applyReplacements(String propertyName, Map<String, String> mappedReplacements)
@@ -184,7 +200,7 @@ public class ConfigurationObjectFactory
         return propertyName;
     }
 
-    private void buildParameterized(ArrayList<Callback> callbacks, Method method, Config annotation)
+    private void buildParameterized(List<Callback> callbacks, Method method, Config annotation)
     {
         String defaultValue = null;
 
@@ -230,7 +246,8 @@ public class ConfigurationObjectFactory
                                                " declares config annotation but no field name!");
         }
 
-        callbacks.add(new ConfigMagicMethodInterceptor(config,
+        callbacks.add(new ConfigMagicMethodInterceptor(method, 
+                                                       config,
                                                        annotationValues,
                                                        paramTokenList,
                                                        bully,
@@ -272,10 +289,16 @@ public class ConfigurationObjectFactory
 
     private static final class ConfigMagicFixedValue implements MethodInterceptor
     {
+        private final Method method;
+        private final String assignedFrom;
+
         private final Handler handler;
 
-        private ConfigMagicFixedValue(final Object value, final boolean callSuper)
+        private ConfigMagicFixedValue(final Method method, final String assignedFrom, final Object value, final boolean callSuper)
         {
+            this.method = method;
+            this.assignedFrom = assignedFrom;
+
             // This is a workaround for broken cglib
             if (callSuper) {
                 this.handler = new InvokeSuperHandler();
@@ -307,7 +330,7 @@ public class ConfigurationObjectFactory
         {
             private final Object finalValue;
 
-            public FixedValueHandler(Object finalValue)
+            public FixedValueHandler(final Object finalValue)
             {
                 this.finalValue = finalValue;
             }
@@ -316,8 +339,45 @@ public class ConfigurationObjectFactory
             {
                 return finalValue;
             }
+
+            private transient String toStringValue = null;
+
+            @Override
+            public String toString()
+            {
+                if (toStringValue == null) {
+                    final StringBuilder sb = new StringBuilder("value: ");
+                    if (finalValue != null) {
+                        sb.append(finalValue.toString());
+                        sb.append(", class: ");
+                        sb.append(finalValue.getClass().getName());
+                    }
+                    else {
+                        sb.append("<null>");
+                    }
+                    toStringValue = sb.toString();
+                }
+
+                return toStringValue;
+            }
         }
 
+        private transient String toStringValue = null;
+
+        @Override
+        public String toString()
+        {
+            if (toStringValue == null) {
+                final StringBuilder sb = new StringBuilder(method.getName());
+                sb.append("(): ");
+                sb.append(assignedFrom);
+                sb.append(", ");
+                sb.append(handler.toString());
+                toStringValue = sb.toString();
+            }
+
+            return toStringValue;
+        }
     }
 
 
@@ -338,18 +398,21 @@ public class ConfigurationObjectFactory
 
     private static final class ConfigMagicMethodInterceptor implements MethodInterceptor
     {
+        private final Method method;
         private final ConfigSource config;
         private final String[] properties;
         private final Bully bully;
         private final Object defaultValue;
         private final List<String> paramTokenList;
 
-        private ConfigMagicMethodInterceptor(final ConfigSource config,
+        private ConfigMagicMethodInterceptor(final Method method,
+                                             final ConfigSource config,
                                              final String[] properties,
                                              final List<String> paramTokenList,
                                              final Bully bully,
                                              final Object defaultValue)
         {
+            this.method = method;
             this.config = config;
             this.properties = properties;
             this.paramTokenList = paramTokenList;
@@ -381,6 +444,66 @@ public class ConfigurationObjectFactory
             logger.info("Assigning default value [{}] for {} on [{}#{}()]",
                         new Object[] { defaultValue, properties, method.getDeclaringClass().getName(), method.getName() });
             return defaultValue;
+        }
+
+        private transient String toStringValue = null;
+
+        @Override
+        public String toString()
+        {
+            if (toStringValue == null) {
+                toStringValue = method.getName() + ": " + super.toString();
+            }
+
+            return toStringValue;
+        }
+    }
+
+    private Method findToStringMethod(final Class<?> clazz)
+    {
+        try {
+            return clazz.getMethod("toString", new Class [] {});
+        }
+        catch (NoSuchMethodException nsme) {
+            try {
+                return Object.class.getMethod("toString", new Class [] {});
+            }
+            catch (NoSuchMethodException nsme2) {
+                throw new IllegalStateException("Could not intercept toString method!", nsme);
+            }
+        }
+    }
+
+    private static final class ConfigMagicBeanToString implements MethodInterceptor
+    {
+        private final List<Callback> callbacks;
+
+        private transient String toStringValue = null;
+
+        private ConfigMagicBeanToString(final List<Callback> callbacks)
+        {
+            this.callbacks = callbacks;
+        }
+
+        public Object intercept(final Object o,
+                                final Method method,
+                                final Object[] args,
+                                final MethodProxy methodProxy) throws Throwable
+        {
+            if (toStringValue == null) {
+                final StringBuilder sb = new StringBuilder();
+
+                for (int i = 2; i < callbacks.size(); i++) {
+                    sb.append(callbacks.get(i).toString());
+
+                    if (i < callbacks.size() - 1) {
+                        sb.append("\n");
+                    }
+                }
+                toStringValue = sb.toString();
+            }
+
+            return toStringValue;
         }
     }
 }
