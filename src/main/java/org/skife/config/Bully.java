@@ -4,6 +4,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -78,6 +79,9 @@ class Bully
             if (clazz.isArray()) {
                 return coerceArray(clazz.getComponentType(), value, separator);
             }
+            else if (Class.class.equals(clazz)) {
+                return coerceClass(type, null, value);
+            }
             else {
                 return coerce(clazz, value);
             }
@@ -89,12 +93,55 @@ class Bully
             if (rawType instanceof Class<?>) {
                 Type[] args = parameterizedType.getActualTypeArguments();
 
-                if (args != null && args.length == 1 && args[0] instanceof Class<?>) {
-                    return coerceCollection((Class<?>)rawType, (Class<?>)args[0], value, separator);
+                if (args != null && args.length == 1) {
+                    if (args[0] instanceof Class<?>) {
+                        return coerceCollection((Class<?>)rawType, (Class<?>)args[0], value, separator);
+                    }
+                    else if (args[0] instanceof WildcardType) {
+                        return coerceClass(type, (WildcardType)args[0], value);
+                    }
                 }
             }
         }
         throw new IllegalStateException(String.format("Don't know how to handle a '%s' type for value '%s'", type, value));
+    }
+
+    private boolean isAssignableFrom(Type targetType, Class<?> assignedClass) {
+        if (targetType instanceof Class) {
+            return ((Class<?>)targetType).isAssignableFrom(assignedClass);
+        }
+        else if (targetType instanceof WildcardType) {
+            WildcardType wildcardType = (WildcardType)targetType;
+
+            // Class<? extends Foo>
+            for (Type upperBoundType : wildcardType.getUpperBounds()) {
+                if (!Object.class.equals(upperBoundType)) {
+                    if ((upperBoundType instanceof Class<?>) && !((Class<?>)upperBoundType).isAssignableFrom(assignedClass)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private Class<?> coerceClass(Type type, WildcardType wildcardType, String value) {
+        if (value == null) {
+            return null;
+        }
+        else {
+            try {
+                Class<?> clazz = Class.forName(value);
+
+                if (!isAssignableFrom(wildcardType, clazz)) {
+                    throw new IllegalArgumentException("Specified class " + clazz + " is not compatible with required type " + type);
+                }
+                return clazz;
+            }
+            catch (Exception ex) {
+                throw new IllegalArgumentException(ex);
+            }
+        }
     }
 
     private Object coerceArray(Class<?> elemType, String value, Separator separator) {

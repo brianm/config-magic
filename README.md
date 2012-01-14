@@ -15,7 +15,7 @@ Create an interface for your config object:
         String getWhat();
     }
 
-Set the properties that we mapped with @Config above (or simply call System.getProperties()):
+Set the properties that we mapped with `@Config` above (or simply call `System.getProperties()`):
 
     Properties props = new Properties();
     props.setProperty("foo", "hello");
@@ -28,7 +28,7 @@ Then create the config object from the properties:
 
 # Default values
 
-Using @Default() can set arbitrary default values. To set 'null' as the default value, use the @DefaultNull annotation.
+Using `@Default()` can set arbitrary default values. To set `null` as the default value, use the `@DefaultNull`annotation.
 
 # Advanced usage
 
@@ -36,7 +36,20 @@ Using @Default() can set arbitrary default values. To set 'null' as the default 
         @Default("none")
         String getWhat();
 
-   will look at 'what1' first, then at 'what2' and finally fall back to the default.
+will look at `what1` first, then at `what2` and finally fall back to the default.
+
+# Type support
+
+Config-magic supports these types:
+
+* Primitive types: `boolean`, `byte`, `short`, `integer`, `long`, `float`, `double`.
+* Enums. Note that config-magic by default ignores the case for enum values.
+* `java.lang.String`.
+* `java.net.URI`.
+* `java.lang.Class` and simple wildcard extensions (`java.lang.Class<?>`, `java.lang.Class<? extends Foo>` - config-magic will type check that the type passed as a property conforms to the wildcard type), but not more complex wildcard or parameterized types (e.g. `java.lang.Class<? super Bar>` or `java.lang.Class<? extends List<? super Bar>>`).
+* Any instantiable class that has a public constructor with a single `Object` parameter. This is useful for instance for [joda-time](http://joda-time.sourceforge.net/)'s `DateTime` objects.
+* Any instantiable class that has a public constructor with a single `String` parameter. This is useful for instance for `java.lang.File`.
+* Any class that has a static `valueOf` method with a single `String` parameter and the class as its return type.
 
 # Maven dependency
 
