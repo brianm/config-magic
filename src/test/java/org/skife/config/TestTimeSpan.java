@@ -79,6 +79,39 @@ public class TestTimeSpan
         Assert.assertEquals(TimeUnit.MILLISECONDS.convert(5, TimeUnit.DAYS), ec.getValue().getMillis());
     }
 
+    // for [Issue-5]
+    @Test
+    public void testAliases()
+    {
+        Assert.assertEquals(new TimeSpan("5ms"), new TimeSpan("5milliseconds"));
+        Assert.assertEquals(new TimeSpan("1ms"), new TimeSpan("1 millisecond"));
+        Assert.assertEquals(new TimeSpan("7s"), new TimeSpan("7seconds"));
+        Assert.assertEquals(new TimeSpan("1s"), new TimeSpan("1second"));
+        Assert.assertEquals(new TimeSpan("15m"), new TimeSpan("15minutes"));
+        Assert.assertEquals(new TimeSpan("1m"), new TimeSpan("1minute"));
+        Assert.assertEquals(new TimeSpan("25h"), new TimeSpan("25hours"));
+        Assert.assertEquals(new TimeSpan("1h"), new TimeSpan("1hour"));
+        Assert.assertEquals(new TimeSpan("31d"), new TimeSpan("31days"));
+        Assert.assertEquals(new TimeSpan("1d"), new TimeSpan("1day"));
+    }
+
+    // for [Issue-6]
+    @Test
+    public void testWhitespace()
+    {
+        ClassWithTimespanWithWhitespace ec = cof.build(ClassWithTimespanWithWhitespace.class);
+        // "5 h"
+        Assert.assertEquals(5, ec.getValue().getPeriod());
+        Assert.assertEquals(TimeUnit.HOURS, ec.getValue().getUnit());
+        Assert.assertEquals(new TimeSpan(5, TimeUnit.HOURS), ec.getValue());
+        Assert.assertEquals(TimeUnit.MILLISECONDS.convert(5, TimeUnit.HOURS), ec.getValue().getMillis());
+
+        Assert.assertEquals(new TimeSpan("5ms"), new TimeSpan("5 milliseconds"));
+        Assert.assertEquals(new TimeSpan("5s"), new TimeSpan("5 seconds"));
+        Assert.assertEquals(new TimeSpan("5m"), new TimeSpan("5 minutes"));
+        Assert.assertEquals(new TimeSpan("5d"), new TimeSpan("5 days"));
+    }
+    
     @Test(expected = IllegalArgumentException.class)
     public void testNoUnit()
     {
@@ -89,12 +122,6 @@ public class TestTimeSpan
     public void testIllegalUnit()
     {
         cof.build(ClassWithTimespanWithIllegalUnit.class);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testWhitespace()
-    {
-        cof.build(ClassWithTimespanWithWhitespace.class);
     }
 
     public static abstract class ClassWithMilliseconds
@@ -111,6 +138,13 @@ public class TestTimeSpan
         public abstract TimeSpan getValue();
     }
 
+    public static abstract class ClassWithSeconds2
+    {
+        @Config("value")
+        @Default("5seconds")
+        public abstract TimeSpan getValue();
+    }
+    
     public static abstract class ClassWithMinutes
     {
         @Config("value")

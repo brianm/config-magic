@@ -47,6 +47,12 @@ Config-magic supports these types:
 * `java.lang.String`.
 * `java.net.URI`.
 * `java.lang.Class` and simple wildcard extensions (`java.lang.Class<?>`, `java.lang.Class<? extends Foo>` - config-magic will type check that the type passed as a property conforms to the wildcard type), but not more complex wildcard or parameterized types (e.g. `java.lang.Class<? super Bar>` or `java.lang.Class<? extends List<? super Bar>>`).
+* `org.skipe.config.TimeSpan`: constructed from short textual representation like "5d" (or alias "5 days"); units supported are:
+ * ms (alias 'milliseconds')
+ * s ('seconds')
+ * m ('minutes')
+ * h ('hours')
+ * d ('days')
 * Any instantiable class that has a public constructor with a single `Object` parameter. This is useful for instance for [joda-time](http://joda-time.sourceforge.net/)'s `DateTime` objects.
 * Any instantiable class that has a public constructor with a single `String` parameter. This is useful for instance for `java.lang.File`.
 * Any class that has a static `valueOf` method with a single `String` parameter and the class as its return type.
