@@ -8,19 +8,27 @@ public class DataAmount
     private final long value;
     private final DataAmountUnit unit;
     private final long numBytes; 
-    private static final Pattern SPLIT = Pattern.compile("^(\\d+)(\\w+)$");
+    private static final Pattern SPLIT = Pattern.compile("^(\\d+)\\s*([a-zA-Z]+)$");
+    private static final Pattern NUM_ONLY = Pattern.compile("^(\\d+)$");
 
     public DataAmount(String spec)
     {
         Matcher m = SPLIT.matcher(spec);
         if (!m.matches()) {
-            throw new IllegalArgumentException(String.format("%s is not a valid data amount", spec));
+            // #7: allow undecorated unit to mean basic bytes
+            m = NUM_ONLY.matcher(spec);
+            if (!m.matches()) {
+                throw new IllegalArgumentException(String.format("%s is not a valid data amount", spec));
+            }
+            unit = DataAmountUnit.BYTE;
+            value = numBytes = Long.parseLong(spec);
+        } else {
+            String number = m.group(1);
+            String type = m.group(2);
+            this.value = Long.parseLong(number);
+            this.unit = DataAmountUnit.fromString(type);
+            this.numBytes = unit.getFactor() * value;
         }
-        String number = m.group(1);
-        String type = m.group(2);
-        this.value = Long.parseLong(number);
-        this.unit = DataAmountUnit.fromString(type);
-        this.numBytes = unit.getFactor() * value;
     }
 
     public DataAmount(long value, DataAmountUnit unit)
@@ -30,6 +38,15 @@ public class DataAmount
         this.numBytes = unit.getFactor() * value;
     }
 
+    /**
+     * @since 0.15
+     */
+    public DataAmount(long rawBytes)
+    {
+        value = numBytes = rawBytes;
+        unit = DataAmountUnit.BYTE;
+    }
+    
     public long getValue()
     {
         return value;
@@ -45,11 +62,12 @@ public class DataAmount
         return numBytes;
     }
 
-    public DataAmount convertTo(DataAmountUnit unit)
+    public DataAmount convertTo(DataAmountUnit newUnit)
     {
-        return new DataAmount(numBytes / unit.getFactor(), unit);
+        return new DataAmount(numBytes / newUnit.getFactor(), newUnit);
     }
 
+    @Override
     public String toString()
     {
         return value + unit.getSymbol();

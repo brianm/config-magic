@@ -2,6 +2,8 @@ package org.skife.config;
 
 public enum DataAmountUnit
 {
+    BYTE("B", 1l),
+
     KIBIBYTE("KiB", 1024l),
     MEBIBYTE("MiB", 1024l*1024l),
     GIBIBYTE("GiB", 1024l*1024l*1024l),
@@ -42,6 +44,17 @@ public enum DataAmountUnit
                 return unit;
             }
         }
-        throw new IllegalArgumentException("Unknown unit " + text);
+        throw new IllegalArgumentException("Unknown unit '" + text + "'");
+    }
+
+    public static DataAmountUnit fromStringCaseInsensitive(String origText)
+    {
+        final String text = origText.toLowerCase();
+        for (DataAmountUnit unit : DataAmountUnit.values()) {
+            if (unit.symbol.equals(text)) {
+                return unit;
+            }
+        }
+        throw new IllegalArgumentException("Unknown unit '" + origText + "'");
     }
 }
