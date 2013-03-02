@@ -251,6 +251,11 @@
             <id>hgschmie</id>
             <name>Henning Schmiedehausen</name>
         </developer>
+        <developer>
+            <id>cowtowncoder</id>
+            <name>Tatu Saloranta</name>
+            <email>tatu@fasterxml.com</email>
+        </developer>
     </developers>
 
 </project>
