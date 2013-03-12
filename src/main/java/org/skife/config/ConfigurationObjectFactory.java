@@ -95,15 +95,14 @@ public class ConfigurationObjectFactory
 
         if (factories.containsKey(configClass)) {
             Factory f = factories.get(configClass);
-            return (T) f.newInstance(callbacks.toArray(new Callback[callbacks.size()]));
+            return configClass.cast(f.newInstance(callbacks.toArray(new Callback[callbacks.size()])));
         }
         else {
             Enhancer e = new Enhancer();
             e.setSuperclass(configClass);
             e.setCallbackFilter(new ConfigMagicCallbackFilter(slots));
             e.setCallbacks(callbacks.toArray(new Callback[callbacks.size()]));
-            //noinspection unchecked
-            T rt = (T) e.create();
+            T rt = configClass.cast(e.create());
             factories.putIfAbsent(configClass, (Factory) rt);
             return rt;
         }

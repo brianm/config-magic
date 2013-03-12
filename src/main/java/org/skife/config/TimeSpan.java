@@ -69,6 +69,7 @@ public class TimeSpan
         return unit;
     }
 
+    @Override
     public String toString()
     {
         switch (unit) {
