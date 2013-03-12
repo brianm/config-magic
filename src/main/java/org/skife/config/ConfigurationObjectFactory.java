@@ -277,7 +277,7 @@ public class ConfigurationObjectFactory
                                                " declares config annotation but no field name!");
         }
 
-        callbacks.add(new ConfigMagicMethodInterceptor(method, 
+        callbacks.add(new ConfigMagicMethodInterceptor(method,
                                                        config,
                                                        annotationValues,
                                                        paramTokenList,
