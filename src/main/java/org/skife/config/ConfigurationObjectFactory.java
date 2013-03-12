@@ -12,6 +12,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,6 +86,13 @@ public class ConfigurationObjectFactory
                 else {
                     buildSimple(callbacks, method, annotation, mappedReplacements);
                 }
+            }
+            else if (method.isAnnotationPresent(ConfigReplacements.class)) {
+                Map<String, String> fixedMap = mappedReplacements == null ?
+                        Collections.<String, String>emptyMap() : Collections.unmodifiableMap(mappedReplacements);
+
+                slots.put(method, count++);
+                callbacks.add(new ConfigMagicFixedValue(method, "annotation: @ConfigReplacements", fixedMap, false));
             }
             else if (Modifier.isAbstract(method.getModifiers())) {
                 throw new AbstractMethodError(String.format("Method [%s] is abstract and lacks an @Config annotation",
