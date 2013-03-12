@@ -20,6 +20,22 @@ public class TestExposeMappedReplacements
 
         @ConfigReplacements
         Map<String, String> getMap();
+
+        @ConfigReplacements("a")
+        @Default("invalid")
+        String getAString();
+
+        @ConfigReplacements("b")
+        @Default("999")
+        int getBInt();
+
+        @ConfigReplacements("x")
+        @DefaultNull
+        String getDefaultNull();
+
+        @ConfigReplacements("y")
+        @Default("3")
+        int getDefault3();
     }
 
     @Test
@@ -46,5 +62,28 @@ public class TestExposeMappedReplacements
 
         ReplacementConfig config = factory.build(ReplacementConfig.class);
         assertTrue(config.getMap().isEmpty());
+    }
+
+    @Test
+    public void testKeyReplacement()
+    {
+        ConfigurationObjectFactory factory = new ConfigurationObjectFactory(new Properties());
+        Map<String, String> map = new HashMap<String, String>();
+
+        map.put("a", "1");
+        map.put("b", "2");
+
+        ReplacementConfig config = factory.buildWithReplacements(ReplacementConfig.class, map);
+        assertEquals("1", config.getAString());
+        assertEquals(2, config.getBInt());
+    }
+
+    @Test
+    public void testDefaultValues()
+    {
+        ConfigurationObjectFactory factory = new ConfigurationObjectFactory(new Properties());
+        ReplacementConfig config = factory.build(ReplacementConfig.class);
+        assertEquals(null, config.getDefaultNull());
+        assertEquals(3, config.getDefault3());
     }
 }
