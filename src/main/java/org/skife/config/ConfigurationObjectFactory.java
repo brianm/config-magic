@@ -12,6 +12,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +84,21 @@ public class ConfigurationObjectFactory
                     buildParameterized(callbacks, method, annotation);
                 }
                 else {
-                    buildSimple(callbacks, method, annotation, mappedReplacements);
+                    buildSimple(callbacks, method, annotation, mappedReplacements, null);
+                }
+            }
+            else if (method.isAnnotationPresent(ConfigReplacements.class)) {
+                final ConfigReplacements annotation = method.getAnnotation(ConfigReplacements.class);
+
+                slots.put(method, count++);
+
+                if (ConfigReplacements.DEFAULT_VALUE.equals(annotation.value())) {
+                    Map<String, String> fixedMap = mappedReplacements == null ?
+                            Collections.<String, String>emptyMap() : Collections.unmodifiableMap(mappedReplacements);
+
+                    callbacks.add(new ConfigMagicFixedValue(method, "annotation: @ConfigReplacements", fixedMap, false));
+                } else {
+                    buildSimple(callbacks, method, null, mappedReplacements, annotation);
                 }
             }
             else if (Modifier.isAbstract(method.getModifiers())) {
@@ -95,47 +110,63 @@ public class ConfigurationObjectFactory
 
         if (factories.containsKey(configClass)) {
             Factory f = factories.get(configClass);
-            return (T) f.newInstance(callbacks.toArray(new Callback[callbacks.size()]));
+            return configClass.cast(f.newInstance(callbacks.toArray(new Callback[callbacks.size()])));
         }
         else {
             Enhancer e = new Enhancer();
             e.setSuperclass(configClass);
             e.setCallbackFilter(new ConfigMagicCallbackFilter(slots));
             e.setCallbacks(callbacks.toArray(new Callback[callbacks.size()]));
-            //noinspection unchecked
-            T rt = (T) e.create();
+            T rt = configClass.cast(e.create());
             factories.putIfAbsent(configClass, (Factory) rt);
             return rt;
         }
     }
 
     private void buildSimple(List<Callback> callbacks, Method method, Config annotation,
-                             Map<String, String> mappedReplacements)
+                             Map<String, String> mappedReplacements, ConfigReplacements mapAnnotation)
     {
-        String[] propertyNames = annotation.value();
-
-        if (propertyNames == null || propertyNames.length == 0) {
-            throw new IllegalArgumentException("Method " +
-                                               method.toGenericString() +
-                                               " declares config annotation but no field name!");
-        }
-
+        String assignedFrom = null;
+        String[] propertyNames = new String[0];
         String value = null;
 
-        String assignedFrom = null;
+        // Annotation will be null for an @ConfigReplacements, in which case "value" will
+        // be preset and ready to be defaulted + bullied
+        if (annotation != null) {
+            propertyNames = annotation.value();
 
-        for (String propertyName : propertyNames) {
-            if (mappedReplacements != null) {
-                propertyName = applyReplacements(propertyName, mappedReplacements);
+            if (propertyNames == null || propertyNames.length == 0) {
+                throw new IllegalArgumentException("Method " +
+                                                   method.toGenericString() +
+                                                   " declares config annotation but no field name!");
             }
-            value = config.getString(propertyName);
 
-            // First value found wins
+
+            for (String propertyName : propertyNames) {
+                if (mappedReplacements != null) {
+                    propertyName = applyReplacements(propertyName, mappedReplacements);
+                }
+                value = config.getString(propertyName);
+
+                // First value found wins
+                if (value != null) {
+                    assignedFrom = "property: '" + propertyName + "'";
+                    logger.info("Assigning value [{}] for [{}] on [{}#{}()]",
+                                new Object[] { value, propertyName, method.getDeclaringClass().getName(), method.getName() });
+                    break;
+                }
+            }
+        } else {
+            if (mapAnnotation == null) {
+                throw new IllegalStateException("Neither @Config nor @ConfigReplacements provided, this should not be possible!");
+            }
+            String key = mapAnnotation.value();
+            value = mappedReplacements == null ? null : mappedReplacements.get(key);
+
             if (value != null) {
-                assignedFrom = "property: '" + propertyName + "'";
-                logger.info("Assigning value [{}] for [{}] on [{}#{}()]",
-                            new Object[] { value, propertyName, method.getDeclaringClass().getName(), method.getName() });
-                break;
+                assignedFrom = "@ConfigReplacements: key '" + key + "'";
+                logger.info("Assigning mappedReplacement value [{}] for [{}] on [{}#{}()]",
+                            new Object[] { value, key, method.getDeclaringClass().getName(), method.getName() });
             }
         }
 
@@ -246,7 +277,7 @@ public class ConfigurationObjectFactory
                                                " declares config annotation but no field name!");
         }
 
-        callbacks.add(new ConfigMagicMethodInterceptor(method, 
+        callbacks.add(new ConfigMagicMethodInterceptor(method,
                                                        config,
                                                        annotationValues,
                                                        paramTokenList,

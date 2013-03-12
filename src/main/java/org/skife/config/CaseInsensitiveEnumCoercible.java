@@ -13,7 +13,7 @@ public class CaseInsensitiveEnumCoercible implements Coercible<Object>
             return null;
         }
 
-        final Enum[] values;
+        final Enum<?>[] values;
         try {
             values = (Enum[]) clazz.getMethod("values").invoke(null);
         }
