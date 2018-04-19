@@ -1,3 +1,4 @@
+dependency-reduced-pom.xml
 target
 report
 *.ipr
@@ -11,5 +12,4 @@ out
 .project
 .settings
 *~
-
 test-output
