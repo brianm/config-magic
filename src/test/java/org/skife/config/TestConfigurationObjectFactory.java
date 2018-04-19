@@ -206,16 +206,11 @@ public class TestConfigurationObjectFactory
         assertEquals(config.getOption(), "provided");
     }
 
-    @Test
+    @Test(expected = Throwable.class)
     public void testMissingDefault() throws Exception
     {
         ConfigurationObjectFactory c = new ConfigurationObjectFactory(new Properties());
-        try {
-            c.build(Config3.class);
-            fail("Expected exception due to missing value");
-        }
-        catch (Exception e) {
-        }
+        c.build(Config3.class);
     }
 
     @Test
