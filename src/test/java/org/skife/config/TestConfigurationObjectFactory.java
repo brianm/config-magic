@@ -214,7 +214,7 @@ public class TestConfigurationObjectFactory
             c.build(Config3.class);
             fail("Expected exception due to missing value");
         }
-        catch (Exception e) {
+        catch (Throwable e) {
         }
     }
 
