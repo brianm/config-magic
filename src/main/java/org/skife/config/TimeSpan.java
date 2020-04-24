@@ -22,6 +22,7 @@ public class TimeSpan
         UNITS.put("second", TimeUnit.SECONDS);
         UNITS.put("seconds", TimeUnit.SECONDS);
         UNITS.put("m", TimeUnit.MINUTES);
+        UNITS.put("min", TimeUnit.MINUTES);
         UNITS.put("minute", TimeUnit.MINUTES);
         UNITS.put("minutes", TimeUnit.MINUTES);
         UNITS.put("h", TimeUnit.HOURS);
@@ -31,7 +32,7 @@ public class TimeSpan
         UNITS.put("day", TimeUnit.DAYS);
         UNITS.put("days", TimeUnit.DAYS);
     }
-    
+
     public TimeSpan(String spec)
     {
         Matcher m = SPLIT.matcher(spec);
