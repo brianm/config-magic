@@ -172,7 +172,7 @@ public class ConfigurationObjectFactory
 
         final boolean hasDefault = method.isAnnotationPresent(Default.class);
         final boolean hasDefaultNull = method.isAnnotationPresent(DefaultNull.class);
-
+        final boolean hasAutoDefault = method.isAnnotationPresent(AutoDefault.class);
         if (hasDefault && hasDefaultNull) {
             throw new IllegalArgumentException(String.format("@Default and @DefaultNull present in [%s]", method.toGenericString()));
         }
@@ -215,6 +215,21 @@ public class ConfigurationObjectFactory
                             method.toGenericString()));
                 }
             }
+        }
+        else {
+        	if (hasAutoDefault) {
+        		if ("auto".equalsIgnoreCase(value)) {
+        			value = method.getAnnotation(AutoDefault.class).value();
+                    assignedFrom = "annotation: @AutoDefault";
+                    logger.info("Assigning auto default value [{}] for {} on [{}#{}()]",
+                                new Object[] { value, propertyNames, method.getDeclaringClass().getName(), method.getName() });
+        		}
+        		else {
+                    throw new IllegalArgumentException(String.format("@AutoDefault, is expected to set the value of the property to 'auto'"
+                    		+ " inorder to use the auto default value",
+                            method.toGenericString()));
+        		}
+        	}
         }
 
         final Object finalValue = bully.coerce(method.getGenericReturnType(), value, method.getAnnotation(Separator.class));
