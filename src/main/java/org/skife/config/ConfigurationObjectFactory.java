@@ -226,14 +226,15 @@ public class ConfigurationObjectFactory
         else if (value != null && hasForValue) {
         	String[] forvalue = method.getAnnotation(Default.class).for_values();
         	for (String val : forvalue) {
-				if (value.equalsIgnoreCase(val))
-				value = method.getAnnotation(Default.class).value();
-                assignedFrom = "annotation: @Default";
-
-                logger.info("Assigning default for_value [{}] for {} on [{}#{}()]",
-                            new Object[] { value, propertyNames, method.getDeclaringClass().getName(), method.getName() });
-  
-				break;
+				if (value.equalsIgnoreCase(val)) {
+					value = method.getAnnotation(Default.class).value();
+	                assignedFrom = "annotation: @Default";
+	
+	                logger.info("Assigning default for_value [{}] for {} on [{}#{}()]",
+	                            new Object[] { value, propertyNames, method.getDeclaringClass().getName(), method.getName() });
+	  
+					break;
+				}
 			}
         }
 
