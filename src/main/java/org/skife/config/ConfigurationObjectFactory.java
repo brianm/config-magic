@@ -175,11 +175,9 @@ public class ConfigurationObjectFactory
         boolean hasForValue = false;
         if(hasDefault) {
         	String[] forvalue = method.getAnnotation(Default.class).for_values();
-        	for (String forVal : forvalue) {
-				if ("auto".equalsIgnoreCase(forVal));
-				hasForValue = true;
-				break ;
-			}
+        	if (forvalue != null && forvalue.length > 0) {
+        		 hasForValue = true;
+        	}
         }
         if (hasDefault && hasDefaultNull) {
             throw new IllegalArgumentException(String.format("@Default and @DefaultNull present in [%s]", method.toGenericString()));
