@@ -172,6 +172,15 @@ public class ConfigurationObjectFactory
 
         final boolean hasDefault = method.isAnnotationPresent(Default.class);
         final boolean hasDefaultNull = method.isAnnotationPresent(DefaultNull.class);
+        boolean hasForValue = false;
+        if(hasDefault) {
+        	String[] forvalue = method.getAnnotation(Default.class).for_values();
+        	for (String forVal : forvalue) {
+				if ("auto".equalsIgnoreCase(forVal));
+				hasForValue = true;
+				break ;
+			}
+        }
         if (hasDefault && hasDefaultNull) {
             throw new IllegalArgumentException(String.format("@Default and @DefaultNull present in [%s]", method.toGenericString()));
         }
@@ -187,7 +196,8 @@ public class ConfigurationObjectFactory
         //   ignore the passed in value (which will be null)
         // - if all else fails, throw an exception.
         //
-        if (value == null || "auto".equalsIgnoreCase(value)) {
+                
+        if (value == null || hasForValue) {
             if (hasDefault) {
                 value = method.getAnnotation(Default.class).value();
                 assignedFrom = "annotation: @Default";
