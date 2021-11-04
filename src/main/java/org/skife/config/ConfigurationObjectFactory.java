@@ -195,7 +195,7 @@ public class ConfigurationObjectFactory
         // - if all else fails, throw an exception.
         //
                 
-        if (value == null || hasForValue) {
+        if (value == null) {
             if (hasDefault) {
                 value = method.getAnnotation(Default.class).value();
                 assignedFrom = "annotation: @Default";
@@ -222,6 +222,19 @@ public class ConfigurationObjectFactory
                             method.toGenericString()));
                 }
             }
+        }
+        else if (value != null && hasForValue) {
+        	String[] forvalue = method.getAnnotation(Default.class).for_values();
+        	for (String val : forvalue) {
+				if (value.equalsIgnoreCase(val))
+				value = method.getAnnotation(Default.class).value();
+                assignedFrom = "annotation: @Default";
+
+                logger.info("Assigning default for_value [{}] for {} on [{}#{}()]",
+                            new Object[] { value, propertyNames, method.getDeclaringClass().getName(), method.getName() });
+  
+				break;
+			}
         }
 
         final Object finalValue = bully.coerce(method.getGenericReturnType(), value, method.getAnnotation(Separator.class));
