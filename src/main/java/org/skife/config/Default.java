@@ -10,4 +10,5 @@ import java.lang.annotation.ElementType;
 public @interface Default
 {
     String value();
+    String[] for_values() default "*";
 }
