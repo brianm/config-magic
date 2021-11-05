@@ -62,8 +62,17 @@ public class TestDefaultsPresent
     	p.setProperty("value", "auto");
     	cof = new ConfigurationObjectFactory(p);
     	EmptyForValueClass ec = cof.build(EmptyForValueClass.class);
-
         Assert.assertEquals("auto-value", ec.getValue());
+    }
+    
+    @Test
+    public void testClassDefaultForValuesWithNoResult()
+    {
+    	Properties p = new Properties();
+    	p.setProperty("value", "auto");
+    	cof = new ConfigurationObjectFactory(p);
+    	EmptyClass ec = cof.build(EmptyClass.class);
+        Assert.assertEquals("auto", ec.getValue());
     }
     
     public static class EmptyForValueClass
