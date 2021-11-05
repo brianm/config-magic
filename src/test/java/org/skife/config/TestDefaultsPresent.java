@@ -66,6 +66,16 @@ public class TestDefaultsPresent
     }
     
     @Test
+    public void testClassDefaultForValuesFailed()
+    {
+    	Properties p = new Properties();
+    	p.setProperty("value", "23");
+    	cof = new ConfigurationObjectFactory(p);
+    	EmptyForValueClass ec = cof.build(EmptyForValueClass.class);
+        Assert.assertNotEquals("auto-value", ec.getValue());
+    }
+    
+    @Test
     public void testClassDefaultForValuesWithNoResult()
     {
     	Properties p = new Properties();
