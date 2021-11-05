@@ -88,7 +88,7 @@ public class TestDefaultsPresent
     public static class EmptyForValueClass
     {
         @Config("value")
-        @Default(value = "auto-value", for_values = {"auto", "AUTO"})
+        @Default(value = "auto-value", forValues = {"auto", "AUTO"})
         public String getValue()
         {
             return "value-auto";
