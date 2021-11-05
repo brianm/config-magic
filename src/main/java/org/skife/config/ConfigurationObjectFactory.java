@@ -174,7 +174,7 @@ public class ConfigurationObjectFactory
         final boolean hasDefaultNull = method.isAnnotationPresent(DefaultNull.class);
         boolean hasForValue = false;
         if(hasDefault) {
-        	String[] forvalue = method.getAnnotation(Default.class).for_values();
+        	String[] forvalue = method.getAnnotation(Default.class).forValues();
         	if (forvalue != null && forvalue.length > 0) {
         		 hasForValue = true;
         	}
@@ -189,6 +189,7 @@ public class ConfigurationObjectFactory
         // This is how the value logic works if no value has been set by the config:
         //
         // - if the @Default annotation is present, use its value.
+        // - if the @Default annotation is present and has the argument 'forValues', use the default value if any of the forValues matches the property value
         // - if the @DefaultNull annotation is present, accept null as the value
         // - otherwise, check whether the method is not abstract. If it is not, mark the callback that it should call the method and
         //   ignore the passed in value (which will be null)
@@ -224,7 +225,7 @@ public class ConfigurationObjectFactory
             }
         }
         else if (value != null && hasForValue) {
-        	String[] forvalue = method.getAnnotation(Default.class).for_values();
+        	String[] forvalue = method.getAnnotation(Default.class).forValues();
         	for (String val : forvalue) {
 				if (value.equalsIgnoreCase(val)) {
 					value = method.getAnnotation(Default.class).value();
