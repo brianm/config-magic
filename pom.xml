@@ -22,9 +22,8 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git://github.com/brianm/config-magic.git</connection>
-        <developerConnection>scm:git:git@github.com:brianm/config-magic.git</developerConnection>
-        <url>http://github.com/brianm/config-magic/tree/master</url>
+        <connection>scm:git:https://github.com/brianm/config-magic.git</connection>
+        <url>https://github.com/brianm/config-magic</url>
     </scm>
 
     <distributionManagement>
