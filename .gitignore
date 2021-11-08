@@ -11,5 +11,5 @@ out
 .project
 .settings
 *~
-
+.java-version
 test-output
