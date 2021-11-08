@@ -3,7 +3,7 @@
     <groupId>org.skife.config</groupId>
     <artifactId>config-magic</artifactId>
     <packaging>jar</packaging>
-    <version>0.21-SNAPSHOT</version>
+    <version>0.21</version>
     <name>config-magic</name>
     <url>http://github.com/brianm/config-magic</url>
     <description>
@@ -24,7 +24,7 @@
     <scm>
         <connection>scm:git:https://github.com/brianm/config-magic.git</connection>
         <url>https://github.com/brianm/config-magic</url>
-      <tag>HEAD</tag>
+      <tag>config-magic-0.21</tag>
   </scm>
 
     <distributionManagement>
