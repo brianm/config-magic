@@ -211,7 +211,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>git
+            </plugin>
         </plugins>
     </build>
 
