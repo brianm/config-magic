@@ -38,6 +38,28 @@ Using `@Default()` can set arbitrary default values. To set `null` as the defaul
 
 will look at `what1` first, then at `what2` and finally fall back to the default.
 
+# Parameterized configs
+
+        enum StateType {
+           FILESYSTEM,
+           MEMORY
+        }
+        
+        @Config("${state_type}.size")
+        @DefaultNull
+        String getParameterizedConfig(@Param("state_type") StateType e);
+        
+        @Config("${state_type}.${source}.path")
+        @DefaultNull
+        String getDoubleParameterizedConfig(@Param("state_type") StateType e, @Param("source") String source);
+        
+
+Use it like the following:
+        
+        myConfig.getParameterizedConfig(StateType.MEMORY);   // reads from MEMORY.size
+        myConfig.getDoubleParameterizedConfig(StateType.FILESYSTEM, "backend");  // reads from FILESYSTEM.backend.path
+        
+
 # Type support
 
 Config-magic supports these types:
